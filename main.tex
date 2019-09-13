@@ -1,0 +1,31 @@
+\documentclass{article}
+\usepackage{jon}
+\usepackage{amsmath,amsfonts}
+
+\title{Testing}
+\author{Jonathan Sterling}
+
+\begin{document}
+\maketitle
+
+\NewDocumentCommand\Psh{m}{
+  \delimsize{1}\widehat{#1}
+}
+
+\[
+  \parens{
+    \brackets{
+      \angles{
+        \angles{\Psh{\mathbb{C}}}
+        \angles{\widehat{\mathbb{C}}}
+        \parens{x}
+        \parens{\delimsize{2}\int_x y}
+      }
+    }
+  }
+\]
+\[
+  \angles{\angles*{\angles*{\angles*{x}}}}
+\]
+
+\end{document}
