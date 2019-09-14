@@ -3,20 +3,27 @@
 
 \ExplSyntaxOn
 
-\clist_new:N \g_jmsdelim_cmds
+\clist_new:N \g_jmsdelim_size_cmds
+\clist_new:N \g_jmsdelim_fmt_cmds
 \keys_define:nn { jmsdelim } {
-  delimiters .clist_set:N = \g_jmsdelim_cmds,
+  delimiters .clist_set:N = \g_jmsdelim_size_cmds,
+  formatters .clist_set:N = \g_jmsdelim_fmt_cmds
 }
 
 \keys_set:nn { jmsdelim } {
   delimiters = {{},\big,\Big,\bigg,\Bigg},
+  formatters = {{}}
 }
 
+\int_new:N \l_jmsdelim_depth
 \cs_new:Npn \jmsdelim_format_delimiter:n #1 {
-  \clist_item:Nn \g_jmsdelim_cmds {
+  \clist_item:Nn \g_jmsdelim_fmt_cmds {
+    \int_mod:nn { \int_max:nn \l_jmsdelim_depth 0 } { \clist_count:N \g_jmsdelim_fmt_cmds } + 1
+  }
+  \clist_item:Nn \g_jmsdelim_size_cmds {
     \int_min:nn
       { \int_max:nn {#1 + 1} {1} }
-      { \clist_count:N \g_jmsdelim_cmds }
+      { \clist_count:N \g_jmsdelim_size_cmds }
   }
 }
 
@@ -44,11 +51,9 @@
   }
 }
 
-\cs_new:Npn \jmsdelim_set_min_delimsize:n #1 {
-  \bool_if:nTF \l_jmsdelim_counting_mode {
-    \jmsdelim_int_gset_monotone:Nn
-      \g_jmsdelim_min_delim_size
-      {#1}
+\cs_new:Npn \jmsdelim_set_min_mindelim:n #1 {
+  \bool_if:nT \l_jmsdelim_counting_mode {
+    \jmsdelim_int_gset_monotone:Nn \g_jmsdelim_min_delim_size {#1}
   }
 }
 
@@ -67,7 +72,10 @@
       \jmsdelim_delim_aux:nnnn {#1} {#2} {#3} {#4}
     \group_end:
 
-    \jmsdelim_simple_delim:nnnn {\g_jmsdelim_min_delim_size} {#2} {#3} {#4}
+    \jmsdelim_simple_delim:nnnn {\g_jmsdelim_min_delim_size} {#2} {#3} {
+      \int_incr:N \l_jmsdelim_depth
+      #4
+    }
   }
 }
 
@@ -76,8 +84,8 @@
   \keys_set:nn {jmsdelim} {#1}
 }
 
-\NewDocumentCommand\delimsize{m}{
-  \jmsdelim_set_min_delimsize:n #1
+\NewDocumentCommand\mindelim{m}{
+  \jmsdelim_set_min_mindelim:n {#1}
 }
 
 \NewDocumentCommand\delimsep{m}{
