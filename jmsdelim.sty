@@ -92,37 +92,45 @@
   {\jmsdelim_format_delimiter: #1}
 }
 
-\NewDocumentCommand\delim{smmm}{
-  \jmsdelim_delim_aux:nnnn {#1} {#2} {#3} {#4}
+\NewDocumentCommand\delim{+O{}smmm}{
+  \keys_set:nn {jmsdelim} {#1}
+  \jmsdelim_delim_aux:nnnn {#2} {#3} {#4} {#5}
 }
 
-\NewDocumentCommand\parens{sm}{
-  \jmsdelim_delim_aux:nnnn {#1} () {#2}
+\NewDocumentCommand\parens{+O{}sm}{
+  \keys_set:nn {jmsdelim} {#1}
+  \jmsdelim_delim_aux:nnnn {#2} () {#3}
 }
 
-\NewDocumentCommand\brackets{sm}{
-  \jmsdelim_delim_aux:nnnn {#1} [] {#2}
+\NewDocumentCommand\brackets{+O{}sm}{
+  \keys_set:nn {jmsdelim} {#1}
+  \jmsdelim_delim_aux:nnnn {#2} [] {#3}
 }
 
-\NewDocumentCommand\bbrackets{sm}{
-  \jmsdelim_delim_aux:nnnn {#1} \llbracket\rrbracket {#2}
+\NewDocumentCommand\bbrackets{+O{}sm}{
+  \keys_set:nn {jmsdelim} {#1}
+  \jmsdelim_delim_aux:nnnn {#2} \llbracket\rrbracket {#3}
 }
 
-\NewDocumentCommand\angles{sm}{
-  \jmsdelim_delim_aux:nnnn {#1} \langle\rangle {#2}
+\NewDocumentCommand\angles{+O{}sm}{
+  \keys_set:nn {jmsdelim} {#1}
+  \jmsdelim_delim_aux:nnnn {#2} \langle\rangle {#3}
 }
 
 
-\NewDocumentCommand\verts{sm}{
-  \jmsdelim_delim_aux:nnnn {#1} \lvert\rvert {#2}
+\NewDocumentCommand\verts{+O{}sm}{
+  \keys_set:nn {jmsdelim} {#1}
+  \jmsdelim_delim_aux:nnnn {#2} \lvert\rvert {#3}
 }
 
-\NewDocumentCommand\braces{sm}{
-  \jmsdelim_delim_aux:nnnn {#1} \{\} {#2}
+\NewDocumentCommand\braces{+O{}sm}{
+  \keys_set:nn {jmsdelim} {#1}
+  \jmsdelim_delim_aux:nnnn {#2} \{\} {#3}
 }
 
-\NewDocumentCommand\Verts{sm}{
-  \jmsdelim_delim_aux:nnnn {#1} \lVert\rVert {#2}
+\NewDocumentCommand\Verts{+O{}sm}{
+  \keys_set:nn {jmsdelim} {#1}
+  \jmsdelim_delim_aux:nnnn {#2} \lVert\rVert {#3}
 }
 
 \DeclareFontFamily{OMX}{MnSymbolE}{}
@@ -152,8 +160,9 @@
 \DeclareMathDelimiter{\llangle}{\mathopen}{MnLargeSymbols}{'164}{MnLargeSymbols}{'164}
 \DeclareMathDelimiter{\rrangle}{\mathclose}{MnLargeSymbols}{'171}{MnLargeSymbols}{'171}
 
-\NewDocumentCommand\Angles{sm}{
-  \jmsdelim_delim_aux:nnnn {#1} \llangle\rrangle {#2}
+\NewDocumentCommand\Angles{+O{}sm}{
+  \keys_set:nn {jmsdelim} {#1}
+  \jmsdelim_delim_aux:nnnn {#2} \llangle\rrangle {#3}
 }
 
 
