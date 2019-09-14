@@ -12,26 +12,17 @@
   delimiters = {{}, \big,\Big,\bigg,\Bigg}
 }
 
-\int_new:N \__delim_lvl
+\int_new:N \l_jmsdelim_delim_lvl
 \cs_new:Npn \jmsdelim_apply_size: {
   \clist_item:Nn \__delim_cmds {
     \int_min:nn
-      { \int_max:nn {\__delim_lvl + 1} {1} }
+      { \int_max:nn {\l_jmsdelim_delim_lvl + 1} {1} }
       { \clist_count:N \__delim_cmds }
   }
 }
 
 
-\int_new:N \__min_delim_lvl
-\cs_new:Npn \delims_save:n #1 {
-  \int_gset:Nn \__min_delim_lvl {0}
-  \group_begin:
-    #1
-  \group_end:
-  \int_gset:Nn \__min_delim_lvl {0}
-}
-
-
+\int_new:N \g_jmsdelim_min_delim_lvl
 \int_new:N \g_jmsdelim_depth
 \int_new:N \l_jmsdelim_depth
 \int_new:N \l_jmsdelim_smoke_signal
@@ -41,7 +32,9 @@
 \cs_new:Npn \jmsdelim_simple_delim:nnn #1 #2 #3 {
   \mathopen{}
   {\jmsdelim_apply_size: #1}
-  \delims_save:n { #3 }
+  \int_gset:Nn \g_jmsdelim_min_delim_lvl {0}
+  { #3 }
+  \int_gset:Nn \g_jmsdelim_min_delim_lvl {0}
   {\jmsdelim_apply_size: #2}
   \mathclose{}
 }
@@ -53,7 +46,7 @@
       \int_set:Nn \l_jmsdelim_smoke_signal {\g_jmsdelim_smoke_signal}
       \hbox_set:Nn \l_tmpa_box {$#4$}
       \int_compare:nT {\l_jmsdelim_smoke_signal = \g_jmsdelim_smoke_signal} {
-        \int_gset:Nn \g_jmsdelim_depth {\__min_delim_lvl + \l_jmsdelim_depth}
+        \int_gset:Nn \g_jmsdelim_depth {\g_jmsdelim_min_delim_lvl + \l_jmsdelim_depth}
       }
       \int_gincr:N \g_jmsdelim_smoke_signal
     \group_end:
@@ -63,7 +56,7 @@
       \jmsdelim_delim_aux:nnnn {#1} {#2} {#3} {#4}
     \group_end:
 
-    \int_set:Nn \__delim_lvl {
+    \int_set:Nn \l_jmsdelim_delim_lvl {
       \g_jmsdelim_depth - \bool_if:nTF #1 {1} {0}
     }
     \jmsdelim_simple_delim:nnn {#2} {#3} {#4}
@@ -75,8 +68,8 @@
 }
 
 \NewDocumentCommand\delimsize{m}{
-  \int_gset:Nn \__min_delim_lvl {
-    \int_max:nn {#1} {\__min_delim_lvl}
+  \int_gset:Nn \g_jmsdelim_min_delim_lvl {
+    \int_max:nn {#1} {\g_jmsdelim_min_delim_lvl}
   }
 }
 
