@@ -4,7 +4,6 @@
 \ExplSyntaxOn
 
 \clist_new:N \g_jmsdelim_cmds
-\clist_new:N \g_jmsdelim_format_cmds
 \keys_define:nn { jmsdelim } {
   delimiters .clist_set:N = \g_jmsdelim_cmds,
 }
@@ -25,14 +24,18 @@
 \bool_new:N \l_jmsdelim_counting_mode
 
 \cs_new:Npn \jmsdelim_simple_delim:nnnn #1 #2 #3 #4 {
+  \bool_if:nT \l_jmsdelim_counting_mode {
+    \msg_fatal:nn {jmsdelim} {
+      \jmsdelim_simple_delim:nnnn called during counting mode. this is a bug
+    }
+  }
+
   \int_set:Nn \l_tmpa_int #1
-  \int_gset:Nn \g_jmsdelim_min_delim_size {0}
   \mathopen{}
   {\jmsdelim_format_delimiter:n \l_tmpa_int #2}
   { #4 }
   {\jmsdelim_format_delimiter:n \l_tmpa_int #3}
   \mathclose{}
-  \int_gset:Nn \g_jmsdelim_min_delim_size {0}
 }
 
 \cs_new:Npn \jmsdelim_int_gset_monotone:Nn #1 #2 {
@@ -50,20 +53,21 @@
 }
 
 
+\bool_new:N \g_jmsdelim_should_bump
 \cs_new:Npn \jmsdelim_delim_aux:nnnn #1 #2 #3 #4 {
   \bool_if:nTF \l_jmsdelim_counting_mode {
-    \group_begin:
-      \hbox_set:Nn \l_tmpa_box {$#4$}
-    \group_end:
+    \hbox_set:Nn \l_tmpa_box {$#4$}
+    \bool_if:nT \g_jmsdelim_should_bump {\int_gincr:N \g_jmsdelim_min_delim_size}
+    \bool_gset:Nn \g_jmsdelim_should_bump {#1}
   }{
     \group_begin:
-      \bool_set:Nn \l_jmsdelim_counting_mode {\c_true_bool}
+      \bool_set:Nn \l_jmsdelim_counting_mode \c_true_bool
+      \bool_gset:Nn \g_jmsdelim_should_bump {\c_false_bool}
+      \int_gset:Nn \g_jmsdelim_min_delim_size {0}
       \jmsdelim_delim_aux:nnnn {#1} {#2} {#3} {#4}
     \group_end:
 
-    \jmsdelim_simple_delim:nnnn {\g_jmsdelim_min_delim_size} {#2} {#3} {
-      #4
-    }
+    \jmsdelim_simple_delim:nnnn {\g_jmsdelim_min_delim_size} {#2} {#3} {#4}
   }
 }
 
