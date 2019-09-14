@@ -1,9 +1,14 @@
 \documentclass{article}
+\usepackage{xcolor}
 \usepackage{jmsdelim}
 \usepackage{amsmath,amsfonts}
 
 \title{Testing}
 \author{Jonathan Sterling}
+
+\jmsdelimsetup{
+  delimiters = {\color{blue},\color{red}\big,\color{green}\Big,\color{gray}\bigg,\Bigg}, % for debugging
+}
 
 \begin{document}
 \maketitle
@@ -14,8 +19,8 @@
 
 \[
   \parens{
-    \brackets*{
-      \angles*{
+    \brackets{
+      \angles{
         \angles{\Psh{\mathbb{C}}}
         \angles{\widehat{\mathbb{C}}}
         \parens{x}
@@ -25,7 +30,11 @@
   }
 \]
 \[
-  \angles{\angles*{\angles*{\angles*{x}}}}
+  \angles{
+    \angles*{
+      foo \brackets*{z} \brackets{zz}
+    }
+  }
 \]
 
 \end{document}

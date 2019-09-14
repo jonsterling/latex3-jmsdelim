@@ -7,57 +7,53 @@
 \clist_new:N \g_jmsdelim_format_cmds
 \keys_define:nn { jmsdelim } {
   delimiters .clist_set:N = \g_jmsdelim_cmds,
-  formatters .clist_set:N = \g_jmsdelim_format_cmds
 }
 
 \keys_set:nn { jmsdelim } {
   delimiters = {{},\big,\Big,\bigg,\Bigg},
-  formatters = {{}}
 }
 
-\int_new:N \l_jmsdelim_delim_size_ix
-\int_new:N \l_jmsdelim_formatter_ix
-\cs_new:Npn \jmsdelim_format_delimiter: {
-  \clist_item:Nn \g_jmsdelim_format_cmds {
-    \int_mod:nn
-      { \int_max:nn {\l_jmsdelim_formatter_ix } {0} }
-      { \clist_count:N \g_jmsdelim_format_cmds}
-      +1
-  }
+\cs_new:Npn \jmsdelim_format_delimiter:n #1 {
   \clist_item:Nn \g_jmsdelim_cmds {
     \int_min:nn
-      { \int_max:nn {\l_jmsdelim_delim_size_ix + 1} {1} }
+      { \int_max:nn {#1 + 1} {1} }
       { \clist_count:N \g_jmsdelim_cmds }
   }
 }
 
 \int_new:N \g_jmsdelim_min_delim_size
-\int_new:N \g_jmsdelim_size_depth
-\int_new:N \l_jmsdelim_size_depth
-\int_new:N \l_jmsdelim_smoke_signal
-\int_new:N \g_jmsdelim_smoke_signal
 \bool_new:N \l_jmsdelim_counting_mode
 
-\cs_new:Npn \jmsdelim_simple_delim:nnn #1 #2 #3 {
+\cs_new:Npn \jmsdelim_simple_delim:nnnn #1 #2 #3 #4 {
+  \int_set:Nn \l_tmpa_int #1
   \int_gset:Nn \g_jmsdelim_min_delim_size {0}
   \mathopen{}
-  {\jmsdelim_format_delimiter: #1}
-  { #3 }
-  {\jmsdelim_format_delimiter: #2}
+  {\jmsdelim_format_delimiter:n \l_tmpa_int #2}
+  { #4 }
+  {\jmsdelim_format_delimiter:n \l_tmpa_int #3}
   \mathclose{}
   \int_gset:Nn \g_jmsdelim_min_delim_size {0}
 }
 
+\cs_new:Npn \jmsdelim_int_gset_monotone:Nn #1 #2 {
+  \int_gset:Nn #1 {
+    \int_max:nn {#1} {#2}
+  }
+}
+
+\cs_new:Npn \jmsdelim_set_min_delimsize:n #1 {
+  \bool_if:nTF \l_jmsdelim_counting_mode {
+    \jmsdelim_int_gset_monotone:Nn
+      \g_jmsdelim_min_delim_size
+      {#1}
+  }
+}
+
+
 \cs_new:Npn \jmsdelim_delim_aux:nnnn #1 #2 #3 #4 {
   \bool_if:nTF \l_jmsdelim_counting_mode {
     \group_begin:
-      \bool_if:nTF #1 {\int_incr:N \l_jmsdelim_size_depth} {}
-      \int_set:Nn \l_jmsdelim_smoke_signal {\g_jmsdelim_smoke_signal}
       \hbox_set:Nn \l_tmpa_box {$#4$}
-      \int_compare:nT {\l_jmsdelim_smoke_signal = \g_jmsdelim_smoke_signal} {
-        \int_gset:Nn \g_jmsdelim_size_depth {\g_jmsdelim_min_delim_size + \l_jmsdelim_size_depth}
-      }
-      \int_gincr:N \g_jmsdelim_smoke_signal
     \group_end:
   }{
     \group_begin:
@@ -65,27 +61,19 @@
       \jmsdelim_delim_aux:nnnn {#1} {#2} {#3} {#4}
     \group_end:
 
-    \int_set:Nn \l_jmsdelim_delim_size_ix {
-      \g_jmsdelim_size_depth - \bool_if:nTF #1 {1} {0}
-    }
-
-    \jmsdelim_simple_delim:nnn {#2} {#3} {
-      \int_incr:N \l_jmsdelim_formatter_ix
+    \jmsdelim_simple_delim:nnnn {\g_jmsdelim_min_delim_size} {#2} {#3} {
       #4
     }
   }
 }
+
 
 \NewDocumentCommand\jmsdelimsetup{+m}{
   \keys_set:nn {jmsdelim} {#1}
 }
 
 \NewDocumentCommand\delimsize{m}{
-  \bool_if:nTF \l_jmsdelim_counting_mode {
-    \int_gset:Nn \g_jmsdelim_min_delim_size {
-      \int_max:nn {#1} {\g_jmsdelim_min_delim_size}
-    }
-  }
+  \jmsdelim_set_min_delimsize:n #1
 }
 
 \NewDocumentCommand\delimsep{m}{
