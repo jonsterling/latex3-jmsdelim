@@ -75,6 +75,10 @@
   }
 }
 
+\NewDocumentCommand\delimsep{m}{
+  {\jmsdelim_apply_size: #1}
+}
+
 \NewDocumentCommand\delim{smmm}{
   \jmsdelim_delim_aux:nnnn {#1} {#2} {#3} {#4}
 }
