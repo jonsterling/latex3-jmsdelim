@@ -1,31 +1,49 @@
 \documentclass{article}
+\usepackage{xcolor}
 \usepackage{jmsdelim}
 \usepackage{amsmath,amsfonts}
 
 \title{Testing}
 \author{Jonathan Sterling}
 
+\jmsdelimsetup{
+  % delimiters = {\color{blue},\color{red}\big,\color{green}\Big,\color{gray}\bigg,\Bigg}, % for debugging; inside out
+  formatters= {\color{blue},\color{red},\color{green},\color{gray},\color{violet}}, %rainbow; outside in
+}
+
 \begin{document}
 \maketitle
 
 \NewDocumentCommand\Psh{m}{
-  \delimsize{1}\widehat{#1}
+  \mindelim{1}\widehat{#1}
 }
 
 \[
   \parens{
-    \brackets*{
-      \angles*{
+    \brackets{
+      \angles{
         \angles{\Psh{\mathbb{C}}}
         \angles{\widehat{\mathbb{C}}}
-        \parens{x}
-        \parens{\delimsize{2}\int_x y}
+        \parens{\mindelim{3}\widehat{T}\parens{x}}
+        \parens{\mindelim{2}\int_x y}
       }
     }
   }
 \]
 \[
-  \angles{\angles*{\angles*{\angles*{x}}}}
+  \braces{
+    \braces*{d}
+  }
+\]
+
+\[
+  \angles{
+    \angles*{
+      \angles*{
+        \brackets*{z} \brackets{z}
+      }
+    }
+  }
 \]
 
 \end{document}
