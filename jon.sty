@@ -4,12 +4,19 @@
 
 \ExplSyntaxOn
 
-\seq_new:N \__delim_cmds
-\seq_set_split:Nnn \__delim_cmds {,} {,\big,\Big,\bigg,\Bigg}
+\clist_new:N \__delim_cmds
+
+\keys_define:nn { delims } {
+  delimiters .clist_set:N = \__delim_cmds
+}
+
+\keys_set:nn { delims } {
+  delimiters = {{}, \color{red}\big,\Big,\bigg,\Bigg}
+}
 
 \cs_new:Npn \delims_apply_size:n #1 {
-  \seq_item:Nn \__delim_cmds {
-    \int_min:nn {\int_max:nn {#1 +1} {1}} {\seq_count:N \__delim_cmds}
+  \clist_item:Nn \__delim_cmds {
+    \int_min:nn {\int_max:nn {#1+1} {1}} {\clist_count:N \__delim_cmds}
   }
 }
 
