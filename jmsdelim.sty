@@ -1,4 +1,4 @@
-\RequirePackage{xcolor}
+\RequirePackage{expl3}
 \RequirePackage{xparse}
 
 \ExplSyntaxOn
@@ -30,13 +30,13 @@
 \bool_new:N \l_jmsdelim_counting_mode
 
 \cs_new:Npn \jmsdelim_simple_delim:nnn #1 #2 #3 {
+  \int_gset:Nn \g_jmsdelim_min_delim_lvl {0}
   \mathopen{}
   {\jmsdelim_apply_size: #1}
-  \int_gset:Nn \g_jmsdelim_min_delim_lvl {0}
   { #3 }
-  \int_gset:Nn \g_jmsdelim_min_delim_lvl {0}
   {\jmsdelim_apply_size: #2}
   \mathclose{}
+  \int_gset:Nn \g_jmsdelim_min_delim_lvl {0}
 }
 
 \cs_new:Npn \jmsdelim_delim_aux:nnnn #1 #2 #3 #4 {
@@ -68,8 +68,10 @@
 }
 
 \NewDocumentCommand\delimsize{m}{
-  \int_gset:Nn \g_jmsdelim_min_delim_lvl {
-    \int_max:nn {#1} {\g_jmsdelim_min_delim_lvl}
+  \bool_if:nTF \l_jmsdelim_counting_mode {
+    \int_gset:Nn \g_jmsdelim_min_delim_lvl {
+      \int_max:nn {#1} {\g_jmsdelim_min_delim_lvl}
+    }
   }
 }
 
@@ -85,8 +87,57 @@
   \jmsdelim_delim_aux:nnnn {#1} [] {#2}
 }
 
+\NewDocumentCommand\bbrackets{sm}{
+  \jmsdelim_delim_aux:nnnn {#1} \llbracket\rrbracket {#2}
+}
+
 \NewDocumentCommand\angles{sm}{
   \jmsdelim_delim_aux:nnnn {#1} \langle\rangle {#2}
 }
+
+
+\NewDocumentCommand\verts{sm}{
+  \jmsdelim_delim_aux:nnnn {#1} \lvert\rvert {#2}
+}
+
+\NewDocumentCommand\braces{sm}{
+  \jmsdelim_delim_aux:nnnn {#1} \{\} {#2}
+}
+
+\NewDocumentCommand\Verts{sm}{
+  \jmsdelim_delim_aux:nnnn {#1} \lVert\rVert {#2}
+}
+
+\DeclareFontFamily{OMX}{MnSymbolE}{}
+\DeclareSymbolFont{MnLargeSymbols}{OMX}{MnSymbolE}{m}{n}
+\SetSymbolFont{MnLargeSymbols}{bold}{OMX}{MnSymbolE}{b}{n}
+\DeclareFontShape{OMX}{MnSymbolE}{m}{n}{
+    <-6>  MnSymbolE5
+   <6-7>  MnSymbolE6
+   <7-8>  MnSymbolE7
+   <8-9>  MnSymbolE8
+   <9-10> MnSymbolE9
+  <10-12> MnSymbolE10
+  <12->   MnSymbolE12
+}{}
+\DeclareFontShape{OMX}{MnSymbolE}{b}{n}{
+    <-6>  MnSymbolE-Bold5
+   <6-7>  MnSymbolE-Bold6
+   <7-8>  MnSymbolE-Bold7
+   <8-9>  MnSymbolE-Bold8
+   <9-10> MnSymbolE-Bold9
+  <10-12> MnSymbolE-Bold10
+  <12->   MnSymbolE-Bold12
+}{}
+
+\let\llangle\@undefined
+\let\rrangle\@undefined
+\DeclareMathDelimiter{\llangle}{\mathopen}{MnLargeSymbols}{'164}{MnLargeSymbols}{'164}
+\DeclareMathDelimiter{\rrangle}{\mathclose}{MnLargeSymbols}{'171}{MnLargeSymbols}{'171}
+
+\NewDocumentCommand\Angles{sm}{
+  \jmsdelim_delim_aux:nnnn {#1} \llangle\rrangle {#2}
+}
+
 
 \ExplSyntaxOff
