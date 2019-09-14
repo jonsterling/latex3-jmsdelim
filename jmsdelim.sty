@@ -1,13 +1,15 @@
 \RequirePackage{expl3}
+\RequirePackage{l3keys2e}
 \RequirePackage{xparse}
 
 \ExplSyntaxOn
 
-\clist_new:N \g_jmsdelim_size_cmds
-\clist_new:N \g_jmsdelim_fmt_cmds
+\clist_new:N \l_jmsdelim_size_cmds
+\clist_new:N \l_jmsdelim_fmt_cmds
+
 \keys_define:nn { jmsdelim } {
-  delimiters .clist_set:N = \g_jmsdelim_size_cmds,
-  formatters .clist_set:N = \g_jmsdelim_fmt_cmds
+  delimiters .clist_set:N = \l_jmsdelim_size_cmds,
+  formatters .clist_set:N = \l_jmsdelim_fmt_cmds,
 }
 
 \keys_set:nn { jmsdelim } {
@@ -17,13 +19,13 @@
 
 \int_new:N \l_jmsdelim_depth
 \cs_new:Npn \jmsdelim_format_delimiter:n #1 {
-  \clist_item:Nn \g_jmsdelim_fmt_cmds {
-    \int_mod:nn { \int_max:nn \l_jmsdelim_depth 0 } { \clist_count:N \g_jmsdelim_fmt_cmds } + 1
+  \clist_item:Nn \l_jmsdelim_fmt_cmds {
+    \int_mod:nn { \int_max:nn \l_jmsdelim_depth 0 } { \clist_count:N \l_jmsdelim_fmt_cmds } + 1
   }
-  \clist_item:Nn \g_jmsdelim_size_cmds {
+  \clist_item:Nn \l_jmsdelim_size_cmds {
     \int_min:nn
       { \int_max:nn {#1 + 1} {1} }
-      { \clist_count:N \g_jmsdelim_size_cmds }
+      { \clist_count:N \l_jmsdelim_size_cmds }
   }
 }
 
@@ -107,11 +109,6 @@
   \jmsdelim_delim_aux:nnnn {#2} [] {#3}
 }
 
-\NewDocumentCommand\bbrackets{+O{}sm}{
-  \keys_set:nn {jmsdelim} {#1}
-  \jmsdelim_delim_aux:nnnn {#2} \llbracket\rrbracket {#3}
-}
-
 \NewDocumentCommand\angles{+O{}sm}{
   \keys_set:nn {jmsdelim} {#1}
   \jmsdelim_delim_aux:nnnn {#2} \langle\rangle {#3}
@@ -133,37 +130,17 @@
   \jmsdelim_delim_aux:nnnn {#2} \lVert\rVert {#3}
 }
 
-\DeclareFontFamily{OMX}{MnSymbolE}{}
-\DeclareSymbolFont{MnLargeSymbols}{OMX}{MnSymbolE}{m}{n}
-\SetSymbolFont{MnLargeSymbols}{bold}{OMX}{MnSymbolE}{b}{n}
-\DeclareFontShape{OMX}{MnSymbolE}{m}{n}{
-    <-6>  MnSymbolE5
-   <6-7>  MnSymbolE6
-   <7-8>  MnSymbolE7
-   <8-9>  MnSymbolE8
-   <9-10> MnSymbolE9
-  <10-12> MnSymbolE10
-  <12->   MnSymbolE12
-}{}
-\DeclareFontShape{OMX}{MnSymbolE}{b}{n}{
-    <-6>  MnSymbolE-Bold5
-   <6-7>  MnSymbolE-Bold6
-   <7-8>  MnSymbolE-Bold7
-   <8-9>  MnSymbolE-Bold8
-   <9-10> MnSymbolE-Bold9
-  <10-12> MnSymbolE-Bold10
-  <12->   MnSymbolE-Bold12
-}{}
 
-\let\llangle\@undefined
-\let\rrangle\@undefined
-\DeclareMathDelimiter{\llangle}{\mathopen}{MnLargeSymbols}{'164}{MnLargeSymbols}{'164}
-\DeclareMathDelimiter{\rrangle}{\mathclose}{MnLargeSymbols}{'171}{MnLargeSymbols}{'171}
+\NewDocumentCommand\bbrackets{+O{}sm}{
+  \keys_set:nn {jmsdelim} {#1}
+  \jmsdelim_delim_aux:nnnn {#2} \llbracket\rrbracket {#3}
+}
 
 \NewDocumentCommand\Angles{+O{}sm}{
   \keys_set:nn {jmsdelim} {#1}
   \jmsdelim_delim_aux:nnnn {#2} \llangle\rrangle {#3}
 }
 
+\ProcessKeysPackageOptions {jmsdelim}
 
 \ExplSyntaxOff
