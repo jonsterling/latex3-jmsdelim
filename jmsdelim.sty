@@ -95,13 +95,16 @@
 \bool_new:N \g_jmsdelim_should_bump
 \cs_new:Npn \jmsdelim_make:nnnn #1 #2 #3 #4 {
   \bool_if:nTF \l_jmsdelim_counting_mode {
-    \hbox_set:Nn \l_tmpa_box {$#4$}
-    \bool_if:nT \g_jmsdelim_should_bump {\int_gincr:N \g_jmsdelim_min_delim_size}
+    \bool_set:Nn \l_tmpa_bool \g_jmsdelim_should_bump
+    \hbox_set:Nn \l_tmpa_box { $#4$ }
+    \bool_if:nT {\g_jmsdelim_should_bump && ! \l_tmpa_bool } {
+        \int_gincr:N \g_jmsdelim_min_delim_size
+    }
     \bool_gset:Nn \g_jmsdelim_should_bump {#1}
   }{
     \group_begin:
       \bool_set:Nn \l_jmsdelim_counting_mode \c_true_bool
-      \bool_gset:Nn \g_jmsdelim_should_bump {\c_false_bool}
+      \bool_gset:Nn \g_jmsdelim_should_bump \c_false_bool
       \int_gset:Nn \g_jmsdelim_min_delim_size {0}
       \jmsdelim_make:nnnn {#1} {#2} {#3} {#4}
     \group_end:
