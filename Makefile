@@ -3,11 +3,12 @@
 all: jmsdelim.zip
 
 clean:
-	rubber -d --clean jmsdelim.dtx
-	rm -f example.tex *.zip
+	git clean -fx .
 
 jmsdelim.pdf: jmsdelim.dtx jmsdelim.sty
-	rubber -df $<
+	pdflatex jmsdelim.dtx
+	pdflatex jmsdelim.dtx
+	pdflatex jmsdelim.dtx
 
 jmsdelim.sty: jmsdelim.dtx
 	pdflatex -interaction=batchmode jmsdelim.ins
