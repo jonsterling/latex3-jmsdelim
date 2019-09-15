@@ -1,0 +1,487 @@
+% \iffalse meta-comment
+%
+%% File: jmsdelim.dtx Copyright (C) 2019 Jonathan Sterling
+%%
+%% It may be distributed and/or modified under the conditions of the
+%% LaTeX Project Public License (LPPL), either version 1.3c of this
+%% license or (at your option) any later version.  The latest version
+%% of this license is in the file
+%%
+%%    http://www.latex-project.org/lppl.txt
+%%
+%% This file is part of the "GS1 bundle" (The Work in LPPL)
+%% and all files in that bundle must be distributed together.
+%%
+%% The released version of this bundle is available from CTAN.
+%%
+%% -------------------------------------------------------------------------
+%
+%<*driver>
+\documentclass{l3doc}
+\usepackage{jmsdelim}
+\usepackage[tt=false]{libertine}
+\usepackage[varqu]{zi4}
+\usepackage[libertine]{newtxmath}
+\usepackage[capitalize]{cleveref}
+\usepackage{xcolor}
+\setlength\parindent{0pt}
+\setlength\parskip{.5em}
+
+% ripped from ebproof
+\newenvironment{example}{%
+  \VerbatimEnvironment
+  \begin{VerbatimOut}{example.tex}}{%
+  \end{VerbatimOut}
+  \begin{center}
+  \begin{minipage}{.4\textwidth}
+    \input{example.tex}
+  \end{minipage}%
+  \begin{minipage}{.6\textwidth}
+    \small\VerbatimInput[gobble=0]{example.tex}
+  \end{minipage}%
+  \end{center}
+}
+
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% \title{The \pkg{jmsdelim} package}
+%
+% \author{Jonathan Sterling}
+%
+% \date{September 14, 2019}
+%
+% \maketitle
+%
+% \begin{documentation}
+%
+% \section{Overview}
+%
+% Sizing delimiters using \cs{left} and \cs{right} should be outlawed! The results are nearly always unaesthetic, primarily because the correct size of a mathematical delimiter is a typesetting consideration which does \emph{not} emanate from the physical size of the interior.
+%
+% Correctly sizing delimiters is highly difficult, particularly in well-architected documents: a correctly engineered mathematical document will include macros for all operations, and these macros necessarily will include delimiters (such as parentheses). However, the correct size for the delimiter cannot be chosen ahead of time, because it will depend on the arguments; two options are available:
+%
+% \begin{enumerate}
+%   \item Provide optional arguments to each notation macro for choosing delimiter sizes. This is nearly intractable to do in practice.
+%   \item Ignore delimiter sizes.
+% \end{enumerate}
+%
+% With \pkg{jmsdelim} we offer an alternative: the correct delimiter sizes can be set at the \emph{leaf nodes} of a mathematical expression, and magically bubble upward through the delimiters.
+%
+%
+%
+% \subsection{Basic commands}
+%
+% \begin{function}{\mindelim}
+%   \begin{syntax}
+%     \cs{mindelim}\marg{intexpr_{min}}
+%   \end{syntax}
+%   This sets the minimum delimiter size to \meta{intexpr_{min}} at a given point; delimiter sizes are
+%   represented as natural numbers, with \verb|0| the smallest size. \cs{mindelim} is the work-horse of \pkg{jmsdelim}; let us consider an example of what one might do prior to adopting \pkg{jmsdelim}. Suppose we have defined a macro \cs{Psh} for the free co-completion, following the notation of the French school, and we wish to parenthesize an instance of it:
+%   \begin{example}
+%     \NewDocumentCommand\Cat{}{\mathbf{Cat}}
+%     \NewDocumentCommand\Psh{m}{\widehat{#1}}
+%     \NewDocumentCommand\Hom{mmm}{
+%       \operatorname{Hom}_{#1}(#2,#3)
+%     }
+%     \[ \Hom{\Cat}{1}{\Psh{\mathbb{C}}} \]
+%   \end{example}
+%
+%   One might have tried to get a better result by using \cs{left} and \cs{right}:
+%   \begin{example}
+%     \NewDocumentCommand\Cat{}{\mathbf{Cat}}
+%     \NewDocumentCommand\Psh{m}{\widehat{#1}}
+%     \NewDocumentCommand\Hom{mmm}{
+%       \operatorname{Hom}_{#1}\left(#2,#3\right)
+%     }
+%     \[ \Hom{\Cat}{1}{\Psh{\mathbb{C}}} \]
+%   \end{example}
+%
+%   The above is hugely worse: the height of the hat is not the correct way to size the delimiter! The solution using \pkg{jmsdelim} is quite simple, however: first, we change \cs{Hom} to call \cs{parens}, and then we use \cs{mindelim} within the \cs{Psh} notation.
+%   \begin{example}
+%     \NewDocumentCommand\Cat{}{\mathbf{Cat}}
+%     \NewDocumentCommand\Psh{m}{\mindelim{1}\widehat{#1}}
+%     \NewDocumentCommand\Hom{mmm}{
+%       \operatorname{Hom}_{#1}\parens{#2,#3}
+%     }
+%     \[ \Hom{\Cat}{1}{\Psh{\mathbb{C}}} \]
+%   \end{example}
+%
+% \end{function}
+%
+% \subsubsection{Delimiter commands}
+%
+% All commands in this section produce delimiters; they each have a similar structure:
+% \begin{syntax}
+%   \cs{command}\oarg{options}\meta{*}\ldots\marg{body}
+% \end{syntax}
+% The optional \meta{options} argument locally sets package options (\cref{sec:options}) for the scope of the \meta{body} argument. The starred variants set the minimum delimiter size \emph{outside} the current delimiter to be strictly larger than the current size. For instance:
+% \begin{example}
+%   \[ \braces{\braces{\braces{\braces{x}}}}    \]
+%   \[ \braces{\braces*{\braces*{\braces*{x}}}} \]
+%   \[ \braces{\braces*{\braces{\braces{x}}}}   \]
+% \end{example}
+%
+% \begin{function}{\delim}
+%   \begin{syntax}
+%     \cs{delim}\oarg{options}\meta{*}\marg{left}\marg{right}\marg{body}
+%   \end{syntax}
+%   Surrounds \meta{body} by \meta{left} and \meta{right} respectively.
+% \end{function}
+%
+% \begin{function}{\parens}
+%   \begin{syntax}
+%     \cs{parens}\oarg{options}\meta{*}\marg{body}
+%   \end{syntax}
+%   Surrounds \meta{body} in parentheses.
+% \end{function}
+%
+% \begin{function}{\brackets}
+%   \begin{syntax}
+%     \cs{parens}\oarg{options}\meta{*}\marg{body}
+%   \end{syntax}
+%   Surrounds \meta{body} in square brackets.
+% \end{function}
+%
+% \begin{function}{\bbrackets}
+%   \begin{syntax}
+%     \cs{parens}\oarg{options}\meta{*}\marg{body}
+%   \end{syntax}
+%   Surrounds \meta{body} in Scott brackets; requires that \cs{llbracket} and \cs{rrbracket} are defined, for instance by \pkg{stmaryrd}.
+% \end{function}
+%
+% \begin{function}{\angles}
+%   \begin{syntax}
+%     \cs{angles}\oarg{options}\meta{*}\marg{body}
+%   \end{syntax}
+%   Surrounds \meta{body} in angle brackets; requires that \cs{langle} and \cs{rangle} are defined.
+% \end{function}
+%
+% \begin{function}{\aangles}
+%   \begin{syntax}
+%     \cs{aangles}\oarg{options}\meta{*}\marg{body}
+%   \end{syntax}
+%   Surrounds \meta{body} in double angle brackets; requires that \cs{llangle} and \cs{rrangle} are defined, for instance by \pkg{MnSymbol}.
+% \end{function}
+%
+% \begin{function}{\verts}
+%   \begin{syntax}
+%     \cs{verts}\oarg{options}\meta{*}\marg{body}
+%   \end{syntax}
+%   Surrounds \meta{body} in vertical bars.
+% \end{function}
+%
+% \begin{function}{\vverts}
+%   \begin{syntax}
+%     \cs{verts}\oarg{options}\meta{*}\marg{body}
+%   \end{syntax}
+%   Surrounds \meta{body} in double vertical bars.
+% \end{function}
+%
+% \begin{function}{\braces}
+%   \begin{syntax}
+%     \cs{verts}\oarg{options}\meta{*}\marg{body}
+%   \end{syntax}
+%   Surrounds \meta{body} in curly braces.
+% \end{function}
+%
+% \subsection{Configuration and options}\label{sec:options}
+% \begin{function}{\jmsdelimsetup}
+%   \begin{syntax}
+%     \cs{jmsdelimsetup}\marg{options}
+%   \end{syntax}
+%   \pkg{jmsdelim} can be customized along a few axes.
+% \end{function}
+%
+% \begin{variable}{delimiters}
+%   The option \cmd{delimiters} is a comma-separated list which contains a list of sizing commands for delimiters, from smallest to largest.
+%
+% \end{variable}
+%
+% \begin{variable}{formatters}
+%   The option \cmd{formatters} is a comma-separated list which contains a list of formatting commands for delimiters, from outermost to innermost; the formatters are cycled repeatedly as the depth of delimiters exceeds the provided formatters. The \cmd{formatters} option can, for instance, be used to implement ``rainbow delimiters'':
+%
+%   \begin{example}
+%     \jmsdelimsetup{
+%       formatters =
+%         {\color{blue},
+%          \color{red},
+%          \color{green},
+%          \color{violet}}
+%     }
+%     \[ \verts*{\verts*{\verts*{\verts*{x}}}} \]
+%   \end{example}
+% \end{variable}
+%
+%
+% \subsection{Advanced commands}
+%
+% \begin{function}{\delimsep}
+%   \begin{syntax}
+%     \cs{delimsep}\marg{sep}
+%   \end{syntax}
+%   This command can be used to insert a separator in a multi-place operation; for instance, a \emph{cut}
+%   in sequent calculus can be written \verb|\angles*{t\delimsep{\Vert}\pi}|.
+% \end{function}
+%
+% \subsection{Internals}
+%
+% The internals of \pkg{jmsdelim} are implemented in \pkg{expl3}.
+%
+% \begin{function}{jmsdelim_make:nnnn}
+%   \begin{syntax}
+%     "\jmsdelim_make:nnnn" \Arg{boolexpr_{bump}} \Arg{left} \Arg{right} \Arg{body}
+%   \end{syntax}
+%   This routine renders \meta{body} into a scratch \cmd{hbox} to determine the minimum size of delimiter that can surround it. Then, it renders it again for real, delimiting it accordingly by \meta{left} and \meta{right} respectively. If \meta{boolexpr_{bump}} is true, then it will increase the minimum delimiter size outside the current scope.
+% \end{function}
+%
+% \end{documentation}
+%
+% \begin{implementation}
+%
+% \section{\pkg{jmsdelim} implementation}
+% \label{sec:jmsdelim:implementation}
+%
+%
+%    \begin{macrocode}
+%<*package>
+\RequirePackage{expl3}
+\RequirePackage{l3keys2e}
+\RequirePackage{xparse}
+\ProvidesExplPackage {jmsdelim} {2019/09/14} {0.1}
+  {Compositional delimiter sizing}
+%<@@=jmsdelim>
+%    \end{macrocode}
+%
+% We first declare the options for the \pkg{jmsdelim} module, together with their default valeus.
+%
+%    \begin{macrocode}
+\keys_define:nn { jmsdelim } {
+  delimiters .clist_set:N = \l_jmsdelim_size_cmds,
+  formatters .clist_set:N = \l_jmsdelim_fmt_cmds,
+}
+
+\keys_set:nn { jmsdelim } {
+  delimiters = {{},\big,\Big,\bigg,\Bigg},
+  formatters = {{}}
+}
+%    \end{macrocode}
+%
+%
+%    \begin{macrocode}
+\int_new:N \l_jmsdelim_depth
+%    \end{macrocode}
+%
+% \begin{macro}{\@@_fmt_delim:n}
+%    \begin{macrocode}
+\cs_new:Npn \@@_fmt_delim:n #1 {
+  \clist_item:Nn \l_jmsdelim_fmt_cmds {
+    \int_mod:nn
+      { \int_max:nn \l_jmsdelim_depth 0 }
+      { \clist_count:N \l_jmsdelim_fmt_cmds }
+    + 1
+  }
+  \clist_item:Nn \l_jmsdelim_size_cmds {
+    \int_min:nn
+      { \int_max:nn {#1 + 1} {1} }
+      { \clist_count:N \l_jmsdelim_size_cmds }
+  }
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+\int_new:N \g_jmsdelim_min_delim_size
+\bool_new:N \l_jmsdelim_counting_mode
+%    \end{macrocode}
+%
+% \begin{macro}{\@@_draw:nnnn}
+%    \begin{macrocode}
+\cs_new:Npn \@@_draw:nnnn #1 #2 #3 #4 {
+  \bool_if:nT \l_jmsdelim_counting_mode {
+    \msg_fatal:nn {jmsdelim} {
+      \@@_draw:nnnn called during counting mode. this is a bug
+    }
+  }
+
+  \int_set:Nn \l_tmpa_int #1
+  \mathopen{}
+  {\@@_fmt_delim:n \l_tmpa_int #2}
+  { #4 }
+  {\@@_fmt_delim:n \l_tmpa_int #3}
+  \mathclose{}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_int_gset_monotone:Nn}
+%    \begin{macrocode}
+\cs_new:Npn \@@_int_gset_monotone:Nn #1 #2 {
+  \int_gset:Nn #1 {
+    \int_max:nn {#1} {#2}
+  }
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_set_min:n}
+%    \begin{macrocode}
+\cs_new:Npn \@@_set_min:n #1 {
+  \bool_if:nT \l_jmsdelim_counting_mode {
+    \@@_int_gset_monotone:Nn \g_jmsdelim_min_delim_size {#1}
+  }
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+\bool_new:N \g_jmsdelim_should_bump
+%    \end{macrocode}
+%
+% \begin{macro}{\jmsdelim_make:nnnn}
+%    \begin{macrocode}
+\cs_new:Npn \jmsdelim_make:nnnn #1 #2 #3 #4 {
+  \bool_if:nTF \l_jmsdelim_counting_mode {
+    \hbox_set:Nn \l_tmpa_box {$#4$}
+    \bool_if:nT \g_jmsdelim_should_bump {\int_gincr:N \g_jmsdelim_min_delim_size}
+    \bool_gset:Nn \g_jmsdelim_should_bump {#1}
+  }{
+    \group_begin:
+      \bool_set:Nn \l_jmsdelim_counting_mode \c_true_bool
+      \bool_gset:Nn \g_jmsdelim_should_bump {\c_false_bool}
+      \int_gset:Nn \g_jmsdelim_min_delim_size {0}
+      \jmsdelim_make:nnnn {#1} {#2} {#3} {#4}
+    \group_end:
+
+    \@@_draw:nnnn {\g_jmsdelim_min_delim_size} {#2} {#3} {
+      \int_incr:N \l_jmsdelim_depth
+      #4
+    }
+  }
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\jmsdelimsetup}
+%    \begin{macrocode}
+\NewDocumentCommand\jmsdelimsetup{+m}{
+  \keys_set:nn {jmsdelim} {#1}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\mindelim}
+%    \begin{macrocode}
+\NewDocumentCommand\mindelim{m}{
+  \@@_set_min:n {#1}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\delimsep}
+%    \begin{macrocode}
+\NewDocumentCommand\delimsep{m}{
+  {\@@_fmt_delim: #1}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\delim}
+%    \begin{macrocode}
+\NewDocumentCommand\delim{+O{}smmm}{
+  \keys_set:nn {jmsdelim} {#1}
+  \jmsdelim_make:nnnn {#2} {#3} {#4} {#5}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\parens}
+%    \begin{macrocode}
+\NewDocumentCommand\parens{+O{}sm}{
+  \keys_set:nn {jmsdelim} {#1}
+  \jmsdelim_make:nnnn {#2} () {#3}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\brackets}
+%    \begin{macrocode}
+\NewDocumentCommand\brackets{+O{}sm}{
+  \keys_set:nn {jmsdelim} {#1}
+  \jmsdelim_make:nnnn {#2} [] {#3}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\bbrackets}
+%    \begin{macrocode}
+\NewDocumentCommand\bbrackets{+O{}sm}{
+  \keys_set:nn {jmsdelim} {#1}
+  \jmsdelim_make:nnnn {#2} \llbracket\rrbracket {#3}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\angles}
+%    \begin{macrocode}
+\NewDocumentCommand\angles{+O{}sm}{
+  \keys_set:nn {jmsdelim} {#1}
+  \jmsdelim_make:nnnn {#2} \langle\rangle {#3}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\aangles}
+%    \begin{macrocode}
+\NewDocumentCommand\aangles{+O{}sm}{
+  \keys_set:nn {jmsdelim} {#1}
+  \jmsdelim_make:nnnn {#2} \llangle\rrangle {#3}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\verts}
+%    \begin{macrocode}
+\NewDocumentCommand\verts{+O{}sm}{
+  \keys_set:nn {jmsdelim} {#1}
+  \jmsdelim_make:nnnn {#2} \lvert\rvert {#3}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\vverts}
+%    \begin{macrocode}
+\NewDocumentCommand\vverts{+O{}sm}{
+  \keys_set:nn {jmsdelim} {#1}
+  \jmsdelim_make:nnnn {#2} \lVert\rVert {#3}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\braces}
+%    \begin{macrocode}
+\NewDocumentCommand\braces{+O{}sm}{
+  \keys_set:nn {jmsdelim} {#1}
+  \jmsdelim_make:nnnn {#2} \{\} {#3}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+\ProcessKeysPackageOptions {jmsdelim}
+%    \end{macrocode}
+%
+%\iffalse meta-comment
+%</package>
+%\fi
+%
+% \end{implementation}
+%
+% \PrintIndex
+%
+\endinput
+%
+% end of file

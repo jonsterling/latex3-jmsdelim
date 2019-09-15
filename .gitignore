@@ -1,7 +1,10 @@
 *.refresh
+*.glo
+*.hd
+*.idx
+example.tex
 
 *.zip
-*.pdf
 *.vtc
 *.bcf
 *.run.xml
