@@ -24,6 +24,13 @@
 \usepackage[libertine]{newtxmath}
 \usepackage[capitalize]{cleveref}
 \usepackage{xcolor}
+\definecolor{Matterhorn}{RGB}{77,77,77}
+\definecolor{RedDevil}{RGB}{134,1,17}
+\definecolor{RegalBlue}{RGB}{3,69,117}
+\usepackage[backend=biber,natbib=true, doi=true, citestyle=alphabetic, backref=true, style=alphabetic, maxnames=1000]{biblatex}
+% \usepackage{hyperref}
+\hypersetup{breaklinks=true,colorlinks=true,linkcolor=RedDevil,urlcolor=RegalBlue, citecolor=RegalBlue!70}
+\addbibresource{refs.bib}
 \setlength\parindent{0pt}
 \setlength\parskip{.5em}
 
@@ -100,7 +107,7 @@
 %     \[ \Hom{\Cat}{1}{\Psh{\mathbb{C}}} \]
 %   \end{example}
 %
-%   The above is hugely worse: the height of the hat is not the correct way to size the delimiter! The solution using \pkg{jmsdelim} is quite simple, however: first, we change \cs{Hom} to call \cs{parens}, and then we use \cs{mindelim} within the \cs{Psh} notation.
+%   The above is hugely worse: the height of the hat does not in any way determine the correct size for the delimiter! The solution using \pkg{jmsdelim} is quite simple, however: first, we change \cs{Hom} to call \cs{parens}, and then we use \cs{mindelim} within the \cs{Psh} notation.
 %   \begin{example}
 %     \NewDocumentCommand\Cat{}{\mathbf{Cat}}
 %     \NewDocumentCommand\Psh{m}{\mindelim{1}\widehat{#1}}
@@ -112,7 +119,7 @@
 %
 % \end{function}
 %
-% \subsubsection{Delimiter commands}
+% \subsubsection{Built-in delimiter commands}
 %
 % All commands in this section produce delimiters; they each have a similar structure:
 % \begin{syntax}
@@ -223,8 +230,21 @@
 %   \begin{syntax}
 %     \cs{delimsep}\marg{sep}
 %   \end{syntax}
-%   This command can be used to insert a separator in a multi-place operation; for instance, a \emph{cut}
-%   in sequent calculus can be written \verb|\angles*{t\delimsep{\Vert}\pi}|.
+%   This command can be used to insert a separator in a multi-place operation; this can be used to notate cuts in sequent calculus as in \citet{munch:2013,munch:perfectcut}, for instance:
+%   \begin{example}
+%     \NewDocumentCommand\Cut{mm}{
+%       \angles*{#1 \mathrel{\delimsep{\Vert}} #2}
+%     }
+%     \NewDocumentCommand\Mu{mm}{\mu #1.#2}
+%     \NewDocumentCommand\MuTilde{mm}{\tilde\mu #1.#2}
+%     \[
+%       \Cut{t}{
+%         \MuTilde{x}{
+%           \Cut{\Mu{\alpha}{\Cut{u}{e}}}{e'}
+%         }
+%       }
+%     \]
+%   \end{example}
 % \end{function}
 %
 % \subsection{Internals}
@@ -298,20 +318,20 @@
 \bool_new:N \l_jmsdelim_counting_mode
 %    \end{macrocode}
 %
-% \begin{macro}{\@@_draw:nnnn}
+% \begin{macro}{\@@_draw:nnn}
 %    \begin{macrocode}
-\cs_new:Npn \@@_draw:nnnn #1 #2 #3 #4 {
+\cs_new:Npn \@@_draw:nnn #1 #2 #3 {
   \bool_if:nT \l_jmsdelim_counting_mode {
     \msg_fatal:nn {jmsdelim} {
-      \@@_draw:nnnn called during counting mode. this is a bug
+      \@@_draw:nnn called during counting mode. this is a bug
     }
   }
 
-  \int_set:Nn \l_tmpa_int #1
+  \int_set:Nn \l_tmpa_int \g_jmsdelim_min_delim_size
   \mathopen{}
+  {\@@_fmt_delim:n \l_tmpa_int #1}
+  { #3 }
   {\@@_fmt_delim:n \l_tmpa_int #2}
-  { #4 }
-  {\@@_fmt_delim:n \l_tmpa_int #3}
   \mathclose{}
 }
 %    \end{macrocode}
@@ -356,7 +376,7 @@
       \jmsdelim_make:nnnn {#1} {#2} {#3} {#4}
     \group_end:
 
-    \@@_draw:nnnn {\g_jmsdelim_min_delim_size} {#2} {#3} {
+    \@@_draw:nnn {#2} {#3} {
       \int_incr:N \l_jmsdelim_depth
       #4
     }
@@ -384,7 +404,7 @@
 % \begin{macro}{\delimsep}
 %    \begin{macrocode}
 \NewDocumentCommand\delimsep{m}{
-  {\@@_fmt_delim: #1}
+  {\@@_fmt_delim:n {\g_jmsdelim_min_delim_size} {#1}}
 }
 %    \end{macrocode}
 % \end{macro}
@@ -480,6 +500,7 @@
 %
 % \end{implementation}
 %
+% \printbibliography
 % \PrintIndex
 %
 \endinput

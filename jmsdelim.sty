@@ -65,18 +65,18 @@
 }
 \int_new:N \g_jmsdelim_min_delim_size
 \bool_new:N \l_jmsdelim_counting_mode
-\cs_new:Npn \__jmsdelim_draw:nnnn #1 #2 #3 #4 {
+\cs_new:Npn \__jmsdelim_draw:nnn #1 #2 #3 {
   \bool_if:nT \l_jmsdelim_counting_mode {
     \msg_fatal:nn {jmsdelim} {
-      \__jmsdelim_draw:nnnn called during counting mode. this is a bug
+      \__jmsdelim_draw:nnn called during counting mode. this is a bug
     }
   }
 
-  \int_set:Nn \l_tmpa_int #1
+  \int_set:Nn \l_tmpa_int \g_jmsdelim_min_delim_size
   \mathopen{}
+  {\__jmsdelim_fmt_delim:n \l_tmpa_int #1}
+  { #3 }
   {\__jmsdelim_fmt_delim:n \l_tmpa_int #2}
-  { #4 }
-  {\__jmsdelim_fmt_delim:n \l_tmpa_int #3}
   \mathclose{}
 }
 \cs_new:Npn \__jmsdelim_int_gset_monotone:Nn #1 #2 {
@@ -103,7 +103,7 @@
       \jmsdelim_make:nnnn {#1} {#2} {#3} {#4}
     \group_end:
 
-    \__jmsdelim_draw:nnnn {\g_jmsdelim_min_delim_size} {#2} {#3} {
+    \__jmsdelim_draw:nnn {#2} {#3} {
       \int_incr:N \l_jmsdelim_depth
       #4
     }
@@ -116,7 +116,7 @@
   \__jmsdelim_set_min:n {#1}
 }
 \NewDocumentCommand\delimsep{m}{
-  {\__jmsdelim_fmt_delim: #1}
+  {\__jmsdelim_fmt_delim:n {\g_jmsdelim_min_delim_size} {#1}}
 }
 \NewDocumentCommand\delim{+O{}smmm}{
   \keys_set:nn {jmsdelim} {#1}

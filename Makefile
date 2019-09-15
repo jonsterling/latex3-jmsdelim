@@ -9,6 +9,7 @@ clean:
 
 jmsdelim.pdf: jmsdelim.dtx jmsdelim.sty
 	pdflatex jmsdelim.dtx
+	biber jmsdelim.bcf
 	pdflatex jmsdelim.dtx
 	pdflatex jmsdelim.dtx
 
