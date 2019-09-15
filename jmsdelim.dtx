@@ -321,6 +321,7 @@
 % \end{macro}
 %
 %    \begin{macrocode}
+\int_new:N \l_jmsdelim_current_delim_size
 \int_new:N \g_jmsdelim_min_delim_size
 \bool_new:N \l_jmsdelim_counting_mode
 %    \end{macrocode}
@@ -334,12 +335,14 @@
     }
   }
 
-  \int_set:Nn \l_tmpa_int \g_jmsdelim_min_delim_size
-  \mathopen{}
-  {\@@_fmt_delim:n \l_tmpa_int #1}
-  { #3 }
-  {\@@_fmt_delim:n \l_tmpa_int #2}
-  \mathclose{}
+  \group_begin:
+    \int_set:Nn \l_jmsdelim_current_delim_size \g_jmsdelim_min_delim_size
+    \mathopen{}
+    {\@@_fmt_delim:n \l_jmsdelim_current_delim_size #1}
+    { #3 }
+    {\@@_fmt_delim:n \l_jmsdelim_current_delim_size #2}
+    \mathclose{}
+  \group_end:
 }
 %    \end{macrocode}
 % \end{macro}
@@ -411,7 +414,7 @@
 % \begin{macro}{\delimsep}
 %    \begin{macrocode}
 \NewDocumentCommand\delimsep{m}{
-  {\@@_fmt_delim:n {\g_jmsdelim_min_delim_size} {#1}}
+  {\@@_fmt_delim:n {\l_jmsdelim_current_delim_size} {#1}}
 }
 %    \end{macrocode}
 % \end{macro}
