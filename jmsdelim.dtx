@@ -39,10 +39,12 @@
 
 \let\oldmeta\meta
 \renewcommand\meta[1]{\texttt{\oldmeta{#1}}}
+
 % ripped from ebproof
-\newenvironment{example}{%
+\NewDocumentEnvironment{example}{}{%
   \VerbatimEnvironment
-  \begin{VerbatimOut}{example.tex}}{%
+  \begin{VerbatimOut}{example.tex}%
+}{%
   \end{VerbatimOut}
   \begin{center}
   \begin{minipage}{.4\textwidth}
