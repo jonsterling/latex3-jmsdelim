@@ -429,10 +429,16 @@
 %    \begin{macrocode}
 \cs_new:Npn \jmsdelim_make:nnnn #1 #2 #3 #4 {
   \bool_if:nTF \l_jmsdelim_counting_mode {
+%    \end{macrocode}
+% First, we recall whether we have already received a \emph{bump} instruction at the current level.
+%    \begin{macrocode}
     \bool_set:Nn \l_tmpa_bool \g_jmsdelim_should_bump
     \hbox_set:Nn \l_tmpa_box { $#4$ }
+%    \end{macrocode}
+% If typesetting \cmd{#4} inside the scratch \cmd{box} resulted in the first \emph{bump} instruction, then we will increase the minimum delimiter size. Otherwise, we know that this is either unnecessary or has already happened.
+%    \begin{macrocode}
     \bool_if:nT {\g_jmsdelim_should_bump && ! \l_tmpa_bool } {
-        \int_gincr:N \g_jmsdelim_min_delim_size
+      \int_gincr:N \g_jmsdelim_min_delim_size
     }
     \bool_gset:Nn \g_jmsdelim_should_bump {#1}
   }{
