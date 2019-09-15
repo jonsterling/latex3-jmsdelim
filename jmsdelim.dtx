@@ -36,10 +36,10 @@
 \addbibresource{refs.bib}
 \setlength\parindent{0pt}
 \setlength\parskip{.5em}
-
+%
 \let\oldmeta\meta
 \renewcommand\meta[1]{\texttt{\oldmeta{#1}}}
-
+%
 % ripped from ebproof
 \NewDocumentEnvironment{example}{}{%
   \VerbatimEnvironment
@@ -61,10 +61,10 @@
 }{%
   \end{VerbatimOut}
   \input{example.tex}
-
+%
   \small\VerbatimInput[gobble=0]{example.tex}
 }
-
+%
 \begin{document}
   \DocInput{\jobname.dtx}
 \end{document}
@@ -102,6 +102,7 @@
 %   \begin{syntax}
 %     \cs{mindelim}\marg{intexpr_{min}}
 %   \end{syntax}
+%
 %   This sets the minimum delimiter size to \meta{intexpr_{min}} at a given point; delimiter sizes are
 %   represented as natural numbers, with \verb|0| the smallest size. \cs{mindelim} is the work-horse of \pkg{jmsdelim}; let us consider an example of what one might do prior to adopting \pkg{jmsdelim}. Suppose we have defined a macro \cs{Psh} for the free co-completion, following the notation of the French school, and we wish to parenthesize an instance of it:
 %   \begin{example}
@@ -344,7 +345,7 @@
   delimiters .clist_set:N = \l_jmsdelim_size_cmds,
   formatters .clist_set:N = \l_jmsdelim_fmt_cmds,
 }
-
+%
 \keys_set:nn { jmsdelim } {
   delimiters = {{},\big,\Big,\bigg,\Bigg},
   formatters = {{}}
@@ -388,7 +389,7 @@
       \@@_draw:nnn called during counting mode. this is a bug
     }
   }
-
+%
   \group_begin:
     \int_set:Nn \l_jmsdelim_current_delim_size \g_jmsdelim_min_delim_size
     \mathopen{}
@@ -448,7 +449,7 @@
       \int_gset:Nn \g_jmsdelim_min_delim_size {0}
       \jmsdelim_make:nnnn {#1} {#2} {#3} {#4}
     \group_end:
-
+%
     \@@_draw:nnn {#2} {#3} {
       \int_incr:N \l_jmsdelim_depth
       #4

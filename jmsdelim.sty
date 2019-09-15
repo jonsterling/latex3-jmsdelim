@@ -44,7 +44,6 @@
   delimiters .clist_set:N = \l_jmsdelim_size_cmds,
   formatters .clist_set:N = \l_jmsdelim_fmt_cmds,
 }
-
 \keys_set:nn { jmsdelim } {
   delimiters = {{},\big,\Big,\bigg,\Bigg},
   formatters = {{}}
@@ -72,7 +71,6 @@
       \__jmsdelim_draw:nnn called during counting mode. this is a bug
     }
   }
-
   \group_begin:
     \int_set:Nn \l_jmsdelim_current_delim_size \g_jmsdelim_min_delim_size
     \mathopen{}
@@ -108,7 +106,6 @@
       \int_gset:Nn \g_jmsdelim_min_delim_size {0}
       \jmsdelim_make:nnnn {#1} {#2} {#3} {#4}
     \group_end:
-
     \__jmsdelim_draw:nnn {#2} {#3} {
       \int_incr:N \l_jmsdelim_depth
       #4
