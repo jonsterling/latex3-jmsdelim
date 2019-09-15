@@ -5,6 +5,7 @@
 all: jmsdelim.zip
 
 clean:
+	rm *.pdf
 	git clean -fx .
 
 jmsdelim.pdf: jmsdelim.dtx jmsdelim.sty

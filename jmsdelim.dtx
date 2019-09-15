@@ -23,13 +23,16 @@
 \usepackage[varqu]{zi4}
 \usepackage[libertine]{newtxmath}
 \usepackage[capitalize]{cleveref}
+\usepackage[oldstyle,lining,scale=0.97]{sourcesanspro}
+\usepackage[protrusion=true,expansion=true,tracking=false,kerning=true,spacing=true]{microtype}
 \usepackage{xcolor}
 \definecolor{Matterhorn}{RGB}{77,77,77}
 \definecolor{RedDevil}{RGB}{134,1,17}
 \definecolor{RegalBlue}{RGB}{3,69,117}
 \usepackage[backend=biber,natbib=true, doi=true, citestyle=alphabetic, backref=true, style=alphabetic, maxnames=1000]{biblatex}
-% \usepackage{hyperref}
 \hypersetup{breaklinks=true,colorlinks=true,linkcolor=RedDevil,urlcolor=RegalBlue, citecolor=RegalBlue!70}
+\usepackage{sectsty}
+\allsectionsfont{\sffamily}
 \addbibresource{refs.bib}
 \setlength\parindent{0pt}
 \setlength\parskip{.5em}
@@ -69,7 +72,7 @@
 %
 % Sizing delimiters using \cs{left} and \cs{right} should be outlawed! The results are nearly always unaesthetic, primarily because the correct size of a mathematical delimiter is a typesetting consideration which does \emph{not} emanate from the physical size of the interior.
 %
-% Correctly sizing delimiters is highly difficult, particularly in well-architected documents: a correctly engineered mathematical document will include macros for all operations, and these macros necessarily will include delimiters (such as parentheses). However, the correct size for the delimiter cannot be chosen ahead of time, because it will depend on the arguments; two options are available:
+% Correctly sizing delimiters is very difficult, particularly in well-architected documents: a correctly engineered mathematical document will include macros for all operations, and these macros necessarily will include delimiters (such as parentheses). However, the correct size for the delimiter cannot be chosen ahead of time, because it will depend on the arguments; two options are available:
 %
 % \begin{enumerate}
 %   \item Provide optional arguments to each notation macro for choosing delimiter sizes. This is nearly intractable to do in practice.
