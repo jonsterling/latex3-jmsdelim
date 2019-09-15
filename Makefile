@@ -1,3 +1,5 @@
+# ripped from ebproof
+#
 .PHONY: all clean
 
 all: jmsdelim.zip
