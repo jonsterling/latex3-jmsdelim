@@ -1,4 +1,7 @@
 *.refresh
+*.glo
+*.hd
+*.idx
 
 *.zip
 *.pdf

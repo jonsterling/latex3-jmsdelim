@@ -16,36 +16,21 @@
 %%
 %% -------------------------------------------------------------------------
 %
-%<*driver|package>
-\RequirePackage{expl3}[2017/05/29]
-\GetIdInfo$Id: rule-D.dtx 22 2017-07-15 18:03:18Z mjk $
-  {rule functions for LaTeX3}
-%</driver|package>
 %<*driver>
 \documentclass{l3doc}
+\usepackage[tt=false]{libertine}
+\usepackage[varqu]{zi4}
 \begin{document}
   \DocInput{\jobname.dtx}
 \end{document}
 %</driver>
 % \fi
 %
-% \title{^^A
-%   The \pkg{rule-D} Package\\
-%   Rule Functions\thanks
-%     {^^A
-%       This file describes v\ExplFileVersion,
-%       last revised \ExplFileDate.^^A
-%     }^^A
-% }
+% \title{The \pkg{jmsdelim} package}
 %
-% \author{^^A
-%   Markus Kohm\thanks
-%     {^^A
-%       E-mail: \href{mailto:komascript@gmx.info}{komascript@gmx.info}^^A
-%     }^^A
-% }
+% \author{Jonathan Sterling}
 %
-% \date{Released \ExplFileDate}
+% \date{September 14, 2019}
 %
 % \maketitle
 %
@@ -63,8 +48,7 @@
 %
 % \begin{function}{\rule:nn , \rule:nnn}
 %   \begin{syntax}
-%     "\rule:nnn" \Arg{dimexpr_{raise}} \Arg{dimexpr_{width}}^^A
-% \Arg{dimexpr_{height}}
+%     "\rule:nnn" \Arg{dimexpr_{raise}} \Arg{dimexpr_{width}} \Arg{dimexpr_{height}}
 %     "\rule:nn"  \Arg{dimexpr_{width}} \Arg{dimexpr_{height}}
 %   \end{syntax}
 %   Draw a rule of width \meta{dimexpr_{width}}, height
@@ -77,42 +61,237 @@
 %
 % \begin{implementation}
 %
-% \section{\pkg{rule-D} implementation}
-% \label{sec:rule-D:implementation}
+% \section*{\pkg{jmsdelim} implementation}
+% \label{sec:jmsdelim:implementation}
 %
-%\iffalse meta-comment
+%
+%    \begin{macrocode}
 %<*package>
-%\fi
-%
-% First of all we have to setup package information:
-%    \begin{macrocode}
-\ProvidesExplPackage
-  {rule-D} {\ExplFileDate} {\ExplFileVersion}
-  {experimental~L3~rule~functions}
+\RequirePackage{expl3}
+\RequirePackage{l3keys2e}
+\RequirePackage{xparse}
+\ProvidesExplPackage {jmsdelim} {2019/09/14} {0.1}
+  {Compositional delimiter sizing}
+%<@@=jmsdelim>
 %    \end{macrocode}
 %
-% \begin{macro}{\rule:nn , \rule:nnn}
+% We first declare the options for the \pkg{jmsdelim} module, together with their default valeus.
+%
 %    \begin{macrocode}
-\cs_new:Npn \rule:nn #1#2
-  {
-    \rule:nnn { \c_zero_dim } { #1 } { #2 }
-  }
-\cs_new:Npn \rule:nnn #1#2#3
-  {
+\keys_define:nn { jmsdelim } {
+  delimiters .clist_set:N = \l_jmsdelim_size_cmds,
+  formatters .clist_set:N = \l_jmsdelim_fmt_cmds,
+}
+
+\keys_set:nn { jmsdelim } {
+  delimiters = {{},\big,\Big,\bigg,\Bigg},
+  formatters = {{}}
+}
 %    \end{macrocode}
-%   Following line is same like \cs{leavevmode}, but it's \LaTeX3 instead of
-%   plain\TeX.
+%
+%
 %    \begin{macrocode}
-    \hbox_unpack_clear:N \c_empty_box
-    \hbox:n
-      {
-        \tex_vrule:D width \dim_eval:n { #2 }
-                     height \dim_eval:n { #1 + #3 }
-                     depth -\dim_eval:n { #1 }
-      }
+\int_new:N \l_jmsdelim_depth
+%    \end{macrocode}
+%
+% \begin{macro}{\@@_fmt_delim:n}
+%    \begin{macrocode}
+\cs_new:Npn \@@_fmt_delim:n #1 {
+  \clist_item:Nn \l_jmsdelim_fmt_cmds {
+    \int_mod:nn
+      { \int_max:nn \l_jmsdelim_depth 0 }
+      { \clist_count:N \l_jmsdelim_fmt_cmds }
+    + 1
   }
+  \clist_item:Nn \l_jmsdelim_size_cmds {
+    \int_min:nn
+      { \int_max:nn {#1 + 1} {1} }
+      { \clist_count:N \l_jmsdelim_size_cmds }
+  }
+}
 %    \end{macrocode}
 % \end{macro}
+%
+%    \begin{macrocode}
+\int_new:N \g_jmsdelim_min_delim_size
+\bool_new:N \l_jmsdelim_counting_mode
+%    \end{macrocode}
+%
+% \begin{macro}{\@@_draw:nnnn}
+%    \begin{macrocode}
+\cs_new:Npn \@@_draw:nnnn #1 #2 #3 #4 {
+  \bool_if:nT \l_jmsdelim_counting_mode {
+    \msg_fatal:nn {jmsdelim} {
+      \@@_draw:nnnn called during counting mode. this is a bug
+    }
+  }
+
+  \int_set:Nn \l_tmpa_int #1
+  \mathopen{}
+  {\@@_fmt_delim:n \l_tmpa_int #2}
+  { #4 }
+  {\@@_fmt_delim:n \l_tmpa_int #3}
+  \mathclose{}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_int_gset_monotone:Nn}
+%    \begin{macrocode}
+\cs_new:Npn \@@_int_gset_monotone:Nn #1 #2 {
+  \int_gset:Nn #1 {
+    \int_max:nn {#1} {#2}
+  }
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\jmsdelim_set_min:n}
+%    \begin{macrocode}
+\cs_new:Npn \jmsdelim_set_min:n #1 {
+  \bool_if:nT \l_jmsdelim_counting_mode {
+    \@@_int_gset_monotone:Nn \g_jmsdelim_min_delim_size {#1}
+  }
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+\bool_new:N \g_jmsdelim_should_bump
+%    \end{macrocode}
+%
+% \begin{macro}{\jmsdelim_make:nnnn}
+%    \begin{macrocode}
+\cs_new:Npn \jmsdelim_make:nnnn #1 #2 #3 #4 {
+  \bool_if:nTF \l_jmsdelim_counting_mode {
+    \hbox_set:Nn \l_tmpa_box {$#4$}
+    \bool_if:nT \g_jmsdelim_should_bump {\int_gincr:N \g_jmsdelim_min_delim_size}
+    \bool_gset:Nn \g_jmsdelim_should_bump {#1}
+  }{
+    \group_begin:
+      \bool_set:Nn \l_jmsdelim_counting_mode \c_true_bool
+      \bool_gset:Nn \g_jmsdelim_should_bump {\c_false_bool}
+      \int_gset:Nn \g_jmsdelim_min_delim_size {0}
+      \jmsdelim_make:nnnn {#1} {#2} {#3} {#4}
+    \group_end:
+
+    \@@_draw:nnnn {\g_jmsdelim_min_delim_size} {#2} {#3} {
+      \int_incr:N \l_jmsdelim_depth
+      #4
+    }
+  }
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\jmsdelimsetup}
+%    \begin{macrocode}
+\NewDocumentCommand\jmsdelimsetup{+m}{
+  \keys_set:nn {jmsdelim} {#1}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\jmindelim}
+%    \begin{macrocode}
+\NewDocumentCommand\mindelim{m}{
+  \jmsdelim_set_min:n {#1}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\delimsep}
+%    \begin{macrocode}
+\NewDocumentCommand\delimsep{m}{
+  {\@@_fmt_delim: #1}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\delim}
+%    \begin{macrocode}
+\NewDocumentCommand\delim{+O{}smmm}{
+  \keys_set:nn {jmsdelim} {#1}
+  \jmsdelim_make:nnnn {#2} {#3} {#4} {#5}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\parens}
+%    \begin{macrocode}
+\NewDocumentCommand\parens{+O{}sm}{
+  \keys_set:nn {jmsdelim} {#1}
+  \jmsdelim_make:nnnn {#2} () {#3}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\brackets}
+%    \begin{macrocode}
+\NewDocumentCommand\brackets{+O{}sm}{
+  \keys_set:nn {jmsdelim} {#1}
+  \jmsdelim_make:nnnn {#2} [] {#3}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\bbrackets}
+%    \begin{macrocode}
+\NewDocumentCommand\bbrackets{+O{}sm}{
+  \keys_set:nn {jmsdelim} {#1}
+  \jmsdelim_make:nnnn {#2} \llbracket\rrbracket {#3}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\angles}
+%    \begin{macrocode}
+\NewDocumentCommand\angles{+O{}sm}{
+  \keys_set:nn {jmsdelim} {#1}
+  \jmsdelim_make:nnnn {#2} \langle\rangle {#3}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\aangles}
+%    \begin{macrocode}
+\NewDocumentCommand\aangles{+O{}sm}{
+  \keys_set:nn {jmsdelim} {#1}
+  \jmsdelim_make:nnnn {#2} \llangle\rrangle {#3}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\verts}
+%    \begin{macrocode}
+\NewDocumentCommand\verts{+O{}sm}{
+  \keys_set:nn {jmsdelim} {#1}
+  \jmsdelim_make:nnnn {#2} \lvert\rvert {#3}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\vverts}
+%    \begin{macrocode}
+\NewDocumentCommand\vverts{+O{}sm}{
+  \keys_set:nn {jmsdelim} {#1}
+  \jmsdelim_make:nnnn {#2} \lVert\rVert {#3}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\braces}
+%    \begin{macrocode}
+\NewDocumentCommand\braces{+O{}sm}{
+  \keys_set:nn {jmsdelim} {#1}
+  \jmsdelim_make:nnnn {#2} \{\} {#3}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+\ProcessKeysPackageOptions {jmsdelim}
+%    \end{macrocode}
 %
 %\iffalse meta-comment
 %</package>
