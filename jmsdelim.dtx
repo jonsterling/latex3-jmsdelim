@@ -37,6 +37,8 @@
 \setlength\parindent{0pt}
 \setlength\parskip{.5em}
 
+\let\oldmeta\meta
+\renewcommand\meta[1]{\texttt{\oldmeta{#1}}}
 % ripped from ebproof
 \newenvironment{example}{%
   \VerbatimEnvironment
