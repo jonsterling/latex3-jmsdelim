@@ -1,3 +1,4 @@
+*.latexrun.*
 *.refresh
 *.glo
 *.hd
