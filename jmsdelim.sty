@@ -49,18 +49,27 @@
   formatters = {{}}
 }
 \int_new:N \l_jmsdelim_depth
-\cs_new:Npn \__jmsdelim_fmt_delim:n #1 {
+\cs_new:Npn \__jmsdelim_fmt_delim:nn #1 #2 {
   \clist_item:Nn \l_jmsdelim_fmt_cmds {
     \int_mod:nn
       { \int_max:nn \l_jmsdelim_depth 0 }
       { \clist_count:N \l_jmsdelim_fmt_cmds }
     + 1
   }
-  \clist_item:Nn \l_jmsdelim_size_cmds {
-    \int_min:nn
-      { \int_max:nn {#1 + 1} {1} }
-      { \clist_count:N \l_jmsdelim_size_cmds }
+  \bool_if:nT {#2} {
+    \clist_item:Nn \l_jmsdelim_size_cmds {
+      \int_min:nn
+        { \int_max:nn {#1 + 1} {1} }
+        { \clist_count:N \l_jmsdelim_size_cmds }
+    }
   }
+}
+\cs_new:Npn \__jmsdelim_draw_delim:n #1 {
+  \mathchoice
+    {{\__jmsdelim_fmt_delim:nn \l_jmsdelim_current_delim_size \c_true_bool {#1}}}
+    {{\__jmsdelim_fmt_delim:nn \l_jmsdelim_current_delim_size \c_true_bool {#1}}}
+    {{\__jmsdelim_fmt_delim:nn \l_jmsdelim_current_delim_size \c_false_bool {#1}}}
+    {{\__jmsdelim_fmt_delim:nn \l_jmsdelim_current_delim_size \c_false_bool {#1}}}
 }
 \int_new:N \l_jmsdelim_current_delim_size
 \int_new:N \g_jmsdelim_min_delim_size
@@ -74,9 +83,9 @@
   \group_begin:
     \int_set:Nn \l_jmsdelim_current_delim_size \g_jmsdelim_min_delim_size
     \mathopen{}
-    {\__jmsdelim_fmt_delim:n \l_jmsdelim_current_delim_size #1}
+    {\__jmsdelim_draw_delim:n {#1}}
     { #3 }
-    {\__jmsdelim_fmt_delim:n \l_jmsdelim_current_delim_size #2}
+    {\__jmsdelim_draw_delim:n {#2}}
     \mathclose{}
   \group_end:
 }
@@ -119,7 +128,7 @@
   \__jmsdelim_set_min:n {#1}
 }
 \NewDocumentCommand\delimsep{m}{
-  {\__jmsdelim_fmt_delim:n {\l_jmsdelim_current_delim_size} {#1}}
+  {\__jmsdelim_draw_delim:n {#1}}
 }
 \NewDocumentCommand\delim{+O{}smmm}{
   \keys_set:nn {jmsdelim} {#1}
