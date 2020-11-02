@@ -125,6 +125,7 @@
   }
 
   \cs_set_nopar:Npn \jmsdelim_size_cmd: {
+    % \int_use:N \g__jmsdelim_size
     \__jmsdelim_clist_item:Nn \l__jmsdelim_size_cmds {
       \g__jmsdelim_size + 1
     }
@@ -140,15 +141,25 @@
     \mathopen\jmsdelim_size_cmd: {#2}
   }
 }
-
 \cs_new:Npn \jmsdelim_between:nnn #1 #2 #3 {
   \__jmsdelim_scope:n {
     \__jmsdelim_typeset:Nn \l_tmpa_box {#2}
     \__jmsdelim_typeset:Nn \l_tmpb_box {#3}
-
     \box_use:N \l_tmpa_box
-    \mathrel{\jmsdelim_size_cmd: #1}
+    \mathrel{\jmsdelim_size_cmd: {#1}}
     \box_use:N \l_tmpb_box
+  }
+}
+\cs_new:Npn \jmsdelim_between:nnnnn #1 #2 #3 #4 #5 {
+  \__jmsdelim_scope:n {
+    \__jmsdelim_typeset:Nn \l_tmpa_box {#4}
+    \__jmsdelim_typeset:Nn \l_tmpb_box {#5}
+
+    \mathopen\jmsdelim_size_cmd: {#1}
+    \box_use:N \l_tmpa_box
+    \mathrel{\jmsdelim_size_cmd: {#2}}
+    \box_use:N \l_tmpb_box
+    \mathclose\jmsdelim_size_cmd: {#3}
   }
 }
 
@@ -165,6 +176,9 @@
 }
 \NewDocumentCommand\DelimBetween{mmm}{
   \jmsdelim_between:nnn {#1} {#2} {#3}
+}
+\NewDocumentCommand\DelimBetweenSurround{mmmmm}{
+  \jmsdelim_between:nnnnn {#1} {#2} {#3} {#4} {#5}
 }
 \NewDocumentCommand\DelimPrn{m}{
   \jmsdelim_surround:nnn {(} {)} {#1}

@@ -142,9 +142,7 @@
 %   \begin{example}
 %     \NewDocumentCommand\Cut{mm}{%
 %       \DelimBump%
-%       \DelimSurround{\langle}{\rangle}{%
-%         \DelimBetween{\Vert}{#1}{#2}%
-%       }%
+%       \DelimBetweenSurround{\langle}{\Vert}{\rangle}{#1}{#2}%
 %     }
 %     \NewDocumentCommand\Mu{mm}{\mu #1.#2}
 %     \NewDocumentCommand\MuTilde{mm}{\tilde\mu #1.#2}
@@ -178,6 +176,12 @@
 %   Places an appropriately sized \meta{sep} between \meta{lbody} and \meta{rbody}.
 % \end{function}
 %
+% \begin{function}{\DelimBetweenSurround}
+%   \begin{syntax}
+%     \cs{DelimSurround}\marg{left}\marg{sep}\marg{right}\marg{lbody}\marg{rbody}
+%   \end{syntax}
+%   Places an appropriately sized \meta{sep} between \meta{lbody} and \meta{rbody}, surrounding the result by \meta{left} and \meta{right} respectively.
+% \end{function}
 %
 % \subsection{Derived delimiter commands}
 %
@@ -244,20 +248,27 @@
 %
 % \begin{function}{jmsdelim_between:nnn}
 %   \begin{syntax}
-%     "jmsdelim_between:nn" \Arg{sep} \Arg{lbody} \Arg{rbody}
+%     "jmsdelim_between:nnn" \Arg{sep} \Arg{lbody} \Arg{rbody}
 %   \end{syntax}
 %   This routine separates \meta{lbody} and \meta{rbody} with a separator \meta{sep} of the appropriate size.
+% \end{function}
+%
+% \begin{function}{jmsdelim_between:nnnnn}
+%   \begin{syntax}
+%     "jmsdelim_between:nnnnn" \Arg{left} \Arg{sep} \Arg{right} \Arg{lbody} \Arg{rbody}
+%   \end{syntax}
+%   This routine separates \meta{lbody} and \meta{rbody} with a separator \meta{sep} of the appropriate size, and surrounds the result by \meta{left} and \meta{right} respectively of the same size.
 % \end{function}
 
 % \section{Extended example from \pkg{perfectcut}}
 % \begin{wide-example}
 %   \ignoremathstyle
 %   \NewDocumentCommand\Cut{mm}{%
-%     \DelimBump\DelimGl{\DelimBetween{\Vert}{#1}{#2}}%
+%     \DelimBump\DelimBetweenSurround{\langle}{\Vert}{\rangle}{#1}{#2}%
 %   }
 %   \NewDocumentCommand\mt{}{\tilde\mu}
 %   \NewDocumentCommand\Case{mm}{%
-%     \DelimBrk{\DelimBetween{\vert}{#1}{#2}}%
+%     \DelimBetweenSurround{[}{\vert}{]}{#1}{#2}%
 %   }
 %   The following states the idempotency of an adjunction:
 %   \[
@@ -477,17 +488,33 @@
 }
 %    \end{macrocode}
 % \end{macro}
-
+%
 % \begin{macro}{jmsdelim_between:nnn}
 %    \begin{macrocode}
 \cs_new:Npn \jmsdelim_between:nnn #1 #2 #3 {
   \@@_scope:n {
     \@@_typeset:Nn \l_tmpa_box {#2}
     \@@_typeset:Nn \l_tmpb_box {#3}
-
     \box_use:N \l_tmpa_box
-    \mathrel{\jmsdelim_size_cmd: #1}
+    \mathrel{\jmsdelim_size_cmd: {#1}}
     \box_use:N \l_tmpb_box
+  }
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{jmsdelim_between:nnnnn}
+%    \begin{macrocode}
+\cs_new:Npn \jmsdelim_between:nnnnn #1 #2 #3 #4 #5 {
+  \@@_scope:n {
+    \@@_typeset:Nn \l_tmpa_box {#4}
+    \@@_typeset:Nn \l_tmpb_box {#5}
+
+    \mathopen\jmsdelim_size_cmd: {#1}
+    \box_use:N \l_tmpa_box
+    \mathrel{\jmsdelim_size_cmd: {#2}}
+    \box_use:N \l_tmpb_box
+    \mathclose\jmsdelim_size_cmd: {#3}
   }
 }
 %    \end{macrocode}
@@ -524,6 +551,9 @@
 %    \begin{macrocode}
 \NewDocumentCommand\DelimBetween{mmm}{
   \jmsdelim_between:nnn {#1} {#2} {#3}
+}
+\NewDocumentCommand\DelimBetweenSurround{mmmmm}{
+  \jmsdelim_between:nnnnn {#1} {#2} {#3} {#4} {#5}
 }
 %    \end{macrocode}
 % \end{macro}
