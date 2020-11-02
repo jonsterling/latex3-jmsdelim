@@ -1,11 +1,9 @@
-# ripped from ebproof
-#
 .PHONY: all clean
 
 all: jmsdelim.pdf
 
 clean:
-	rm *.pdf
+	rm -rf *.pdf
 	git clean -fx .
 
 jmsdelim.pdf: jmsdelim.dtx jmsdelim.sty
