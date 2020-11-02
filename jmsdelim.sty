@@ -103,7 +103,7 @@
   \fi
 }
 
-\cs_new:Npn \__jmsdelim_hboxset:Nn #1 #2 {
+\cs_new:Npn \__jmsdelim_hbox_set:Nn #1 #2 {
    \mode_if_math:TF
      { \hbox_set:Nn #1 {$\__jmsdelim_restore_mathstyle: #2$} }
      { \hbox_set:Nn #1 { #2 } }
@@ -121,7 +121,7 @@
   \int_set:Nn \g__jmsdelim_size {0}
   \bool_set:Nn \g__jmsdelim_bump \c_false_bool
 
-  \__jmsdelim_hboxset:Nn #1 {#2}
+  \__jmsdelim_hbox_set:Nn #1 {#2}
 
   \bool_if:NT \g__jmsdelim_bump {
     \bool_if:NF \l_tmpa_bool {

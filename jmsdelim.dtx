@@ -423,10 +423,10 @@
 %    \end{macrocode}
 % \end{macro}
 
-% \begin{macro}{@@_hboxset:Nn}
+% \begin{macro}{@@_hbox_set:Nn}
 % Can only be called in a \cs{@@_save_mathstyle:n} scope.
 %    \begin{macrocode}
-\cs_new:Npn \@@_hboxset:Nn #1 #2 {
+\cs_new:Npn \@@_hbox_set:Nn #1 #2 {
    \mode_if_math:TF
      { \hbox_set:Nn #1 {$\@@_restore_mathstyle: #2$} }
      { \hbox_set:Nn #1 { #2 } }
@@ -453,7 +453,7 @@
   \int_set:Nn \g@@_size {0}
   \bool_set:Nn \g@@_bump \c_false_bool
 
-  \@@_hboxset:Nn #1 {#2}
+  \@@_hbox_set:Nn #1 {#2}
 
   \bool_if:NT \g@@_bump {
     \bool_if:NF \l_tmpa_bool {
