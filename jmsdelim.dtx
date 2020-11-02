@@ -257,6 +257,7 @@
 
 % \section{Extended example from \pkg{perfectcut}}
 % \begin{wide-example}
+%   \ignoremathstyle
 %   \NewDocumentCommand\Cut{mm}{%
 %     \DelimBump\DelimGl{\DelimBetween{\Vert}{#1}{#2}}%
 %   }
@@ -375,7 +376,7 @@
 % \end{macro}
 
 % \subsection{Preservation of math styles}
-% It is fairly complicated and inefficient to preserve math styles across boxes. There is an appropriate way to do so in Lua\LaTeX, which we use conditionally if available; otherwise, we make use of \cs{ThisStyle} and \cs{SavedStyle} from \pkg{scalerel}, which are more inefficient. In fact, it becomes impossible to use \pkg{jmsdelim} in PDF\LaTeX{} when the nesting is sufficiently deep, whereas there is no corresponding blowup in Lua\LaTeX.
+% It is fairly complicated and inefficient to preserve math styles across boxes. There is an appropriate way to do so in Lua\LaTeX, which we use conditionally if available; otherwise, we make use of \cs{ThisStyle} and \cs{SavedStyle} from \pkg{scalerel}, which are more inefficient. In fact, it becomes impossible to use \pkg{jmsdelim} in PDF\LaTeX{} when the nesting is sufficiently deep, whereas there is no corresponding blowup in Lua\LaTeX. The \cs{ignoremathstyle} and \cs{discernmathstyle} macros from \pgk{scalerel} can be used to turn off the inefficient preservation of math styles locally, such as in the case where no subscripts are used.
 
 % \begin{macro}{@@_luatex_save_mathstyle:N}
 %    \begin{macrocode}

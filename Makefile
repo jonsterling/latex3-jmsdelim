@@ -9,13 +9,13 @@ clean:
 	git clean -fx .
 
 jmsdelim.pdf: jmsdelim.dtx jmsdelim.sty
-	lualatex jmsdelim.dtx
+	pdflatex jmsdelim.dtx
 	biber jmsdelim.bcf
-	lualatex jmsdelim.dtx
-	lualatex jmsdelim.dtx
+	pdflatex jmsdelim.dtx
+	pdflatex jmsdelim.dtx
 
 jmsdelim.sty: jmsdelim.dtx
-	lualatex -interaction=batchmode jmsdelim.ins
+	pdflatex -interaction=batchmode jmsdelim.ins
 
 jmsdelim.tds.zip: README.md jmsdelim.sty jmsdelim.pdf
 	rm -rf jmsdelim.tds.zip tds
