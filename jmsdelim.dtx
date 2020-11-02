@@ -25,11 +25,10 @@
 \definecolor{RegalBlue}{RGB}{3,69,117}
 \usepackage[backend=biber,natbib=true, doi=true, citestyle=alphabetic, backref=true, style=alphabetic, maxnames=1000]{biblatex}
 \hypersetup{breaklinks=true,colorlinks=true,linkcolor=RedDevil,urlcolor=RegalBlue, citecolor=RegalBlue!70}
-\usepackage{sectsty}
-\allsectionsfont{\sffamily}
 \addbibresource{refs.bib}
 \setlength\parindent{0pt}
 \setlength\parskip{.5em}
+\renewcommand\bfdefault{b}
 %
 \let\oldmeta\meta
 \renewcommand\meta[1]{\texttt{\oldmeta{#1}}}
