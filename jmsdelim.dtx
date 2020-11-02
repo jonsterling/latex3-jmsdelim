@@ -429,7 +429,7 @@
 % \end{macro}
 
 % \begin{macro}{@@_hbox_set:Nn}
-% Can only be called in a \cs{@@_save_mathstyle:n} scope.
+% Can only be called in a \cs{@@_save_mathstyle:n} scope; sets the contents of an hbox in the saved math (or text) style.
 %    \begin{macrocode}
 \cs_new:Npn \@@_hbox_set:Nn #1 #2 {
    \mode_if_math:TF
@@ -452,6 +452,7 @@
 % \end{macro}
 
 % \begin{macro}{@@_typeset:Nn}
+% Used internally to the delimiter primitives, this function typesets its second argument into the box named by its first argument, keeping track of delimiter size states; in particular, this function causes \cs{jmsdelim_size_cmd:} to be locally set to the correct size command.
 %    \begin{macrocode}
 \cs_new:Npn \@@_typeset:Nn #1 #2 {
   \bool_set:Nn \l_tmpa_bool \g@@_bump
