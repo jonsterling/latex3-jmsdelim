@@ -475,7 +475,7 @@
         #2
       }
     \group_end:
-    \int_gset:Nn \g@@_size_up \l_tmpa_int
+    \int_gset:Nn \g@@_size_up {\int_max:nn \g@@_size_up \l_tmpa_int}
     \bool_gset:Nn \g@@_bump \l_tmpa_bool
   \group_end:
 }

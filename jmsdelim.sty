@@ -125,7 +125,7 @@
         #2
       }
     \group_end:
-    \int_gset:Nn \g__jmsdelim_size_up \l_tmpa_int
+    \int_gset:Nn \g__jmsdelim_size_up {\int_max:nn \g__jmsdelim_size_up \l_tmpa_int}
     \bool_gset:Nn \g__jmsdelim_bump \l_tmpa_bool
   \group_end:
 }
