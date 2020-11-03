@@ -124,7 +124,7 @@
 %   \[ \HomX{\Cat}{1}{\Psh{\mathbb{C}}} \]
 % \end{example}
 %
-% The above is hugely worse: the height of the hat does not in any way determine the correct size for the delimiter! The solution using \pkg{jmsdelim} is quite simple, however: first, we change \cs{Hom} to call \cs{DelimPrn}, and then we use \cs{DelimMin} within the \cs{Psh} notation.
+% The above is appallingly worse: the height of the hat does not in any way determine the correct size for the delimiter! The solution using \pkg{jmsdelim} is quite simple, however: first, we change \cs{Hom} to call \cs{DelimPrn}, and then we use \cs{DelimMin} within the \cs{Psh} notation.
 % \begin{example}
 %   \NewDocumentCommand\Cat{}{\mathbf{Cat}}
 %   \NewDocumentCommand\Psh{m}{\DelimMin{1}\widehat{#1}}
@@ -426,7 +426,7 @@
 
 %
 % \subsubsection{Preservation of math styles}
-% It is fairly complicated and inefficient to preserve math styles across boxes. There is an appropriate way to do so in Lua\LaTeX, which we use conditionally if available; otherwise, we make use of \cs{ThisStyle} and \cs{SavedStyle} from \pkg{scalerel}, which are more inefficient. In fact, it becomes impossible to use \pkg{jmsdelim} in PDF\LaTeX{} when the nesting is sufficiently deep, whereas there is no corresponding blowup in Lua\LaTeX. The \cs{ignoremathstyle} and \cs{discernmathstyle} macros from \pkg{scalerel} can be used to turn off the inefficient preservation of math styles locally, such as in the case where no subscripts are used.
+% It is fairly complicated and inefficient to preserve math styles across boxes. There is an appropriate way to do so in Lua\LaTeX, which we use conditionally if available; otherwise, we make use of \cs{ThisStyle} and \cs{SavedStyle} from \pkg{scalerel}~\citep{segletes:scalerel}, which are more inefficient. In fact, it becomes impossible to use \pkg{jmsdelim} in PDF\LaTeX{} when the nesting is sufficiently deep, whereas there is no corresponding blowup in Lua\LaTeX. The \cs{ignoremathstyle} and \cs{discernmathstyle} macros from \pkg{scalerel} can be used to turn off the inefficient preservation of math styles locally, such as in the case where no subscripts are used.
 
 % \begin{macro}{@@_luatex_save_mathstyle:N}
 %    \begin{macrocode}
