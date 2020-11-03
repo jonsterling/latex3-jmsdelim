@@ -168,6 +168,12 @@
 %     \cs{DelimSurround}\marg{left}\marg{right}\marg{body}
 %   \end{syntax}
 %   Surrounds \meta{body} with appropriately sized \meta{left} and \meta{right} delimiters respectively.
+%   \begin{example}
+%     \NewDocumentCommand\Sum{mm}{%
+%       \DelimMin{1}{\textstyle\sum}_{#1}{#2}%
+%     }
+%     \[\DelimSurround{\vert}{\vert}{\Sum{i}{b_i}}\]
+%   \end{example}
 % \end{function}
 %
 % \begin{function}{\DelimBetween}
@@ -175,6 +181,12 @@
 %     \cs{DelimSurround}\marg{sep}\marg{lbody}\marg{rbody}
 %   \end{syntax}
 %   Places an appropriately sized \meta{sep} between \meta{lbody} and \meta{rbody}.
+%   \begin{example}
+%     \NewDocumentCommand\Sum{mm}{%
+%       \DelimMin{1}{\textstyle\sum}_{#1}{#2}%
+%     }
+%     \[\DelimBetween{\Vert}{a}{\Sum{i}{b_i}}\]
+%   \end{example}
 % \end{function}
 %
 % \begin{function}{\DelimBetweenSurround}
@@ -182,6 +194,16 @@
 %     \cs{DelimSurround}\marg{left}\marg{sep}\marg{right}\marg{lbody}\marg{rbody}
 %   \end{syntax}
 %   Places an appropriately sized \meta{sep} between \meta{lbody} and \meta{rbody}, surrounding the result by \meta{left} and \meta{right} respectively.
+%   \begin{example}
+%     \NewDocumentCommand\Sum{mm}{%
+%       \DelimMin{1}{\textstyle\sum}_{#1}{#2}%
+%     }
+%     \[
+%       \DelimBetweenSurround{\lbrace}{\vert}{\rbrace}{
+%         \Sum{i}{a\cdot b_i}
+%       }{a\in A}
+%     \]
+%   \end{example}
 % \end{function}
 %
 % \subsection{Derived delimiter commands}
