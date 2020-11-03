@@ -89,7 +89,7 @@
 % With \pkg{jmsdelim} we offer an alternative: the correct delimiter sizes can be set at the \emph{leaf nodes} of a mathematical expression, and magically bubble upward through the delimiters.
 %
 %
-% \subsection{Document interface}
+% \section{Document interface}
 %
 % \begin{function}{\DelimMin}
 %   \begin{syntax}
@@ -259,7 +259,7 @@
 %
 %
 %
-% \subsection{Interface for macro authors}
+% \section{Interface for macro authors}
 %
 % The internals of \pkg{jmsdelim} are implemented in \pkg{expl3}.
 %
@@ -268,6 +268,13 @@
 %     "jmsdelim_scope:nn" \Arg{pre} \Arg{post}
 %   \end{syntax}
 %   This is the fundamental control structure for authors of custom delimiting commands; \meta{pre} is a block of code that renders things to temporary boxes, and \Arg{post} is code that \emph{uses} these boxes, placing them relative to some delimiters. The function of \cs{jmsdelim_scope:nn} is to watch for the delimiter size and bumping state updates induced by \meta{pre}, and set the delimiter size commands correctly before executing \meta{post}. Both \meta{pre} and \meta{post} are to be executed in the same block level.
+% \end{function}
+%
+% \begin{function}{jmsdelim_hbox_set:Nn}
+%   \begin{syntax}
+%     "jmsdelim_hbox_set:Nn" \Arg{box} \Arg{contents}
+%   \end{syntax}
+%   This command is meant to be used inside the \meta{pre} block of \cs{jmsdelim_scope:nn}; it typesets \meta{contents} in the box named by \meta{box}, correctly propagating the math style.
 % \end{function}
 %
 % \begin{function}{jmsdelim_size_cmd:}
@@ -372,9 +379,6 @@
 \keys_define:nn { jmsdelim } {
   size~commands .clist_set:N = \l@@_size_cmds,
 }
-%    \end{macrocode}
-%    \begin{macrocode}
-\NewDocumentCommand\normaldelim{}{}
 \keys_set:nn { jmsdelim } {
   size~commands = {relax,big,Big,bigg,Bigg},
 }
@@ -390,6 +394,8 @@
 \int_gset:Nn \g@@_size_up {0}
 %    \end{macrocode}
 %
+% \subsection{Internals}
+%
 % \begin{macro}{\@@_clist_item:Nn}
 % A version of \cs{clist_item:Nn} that takes the last item when the index is out of bounds.
 %    \begin{macrocode}
@@ -400,8 +406,26 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
+% \begin{macro}{@@_setup_sizes:}
+%    \begin{macrocode}
+\cs_new:Npn \@@_setup_sizes: {
+  \int_gset:Nn \g@@_size {
+    \int_max:nn \g@@_size \g@@_size_up
+    + \bool_if:NTF \g@@_bump {1} {0}
+  }
 
-% \subsection{Preservation of math styles}
+  \cs_set_eq:Nc \jmsdelim_size_cmd: {
+    \@@_clist_item:Nn \l@@_size_cmds {
+      \g@@_size + 1
+    }
+  }
+}
+%    \end{macrocode}
+% \end{macro}
+
+%
+% \subsubsection{Preservation of math styles}
 % It is fairly complicated and inefficient to preserve math styles across boxes. There is an appropriate way to do so in Lua\LaTeX, which we use conditionally if available; otherwise, we make use of \cs{ThisStyle} and \cs{SavedStyle} from \pkg{scalerel}, which are more inefficient. In fact, it becomes impossible to use \pkg{jmsdelim} in PDF\LaTeX{} when the nesting is sufficiently deep, whereas there is no corresponding blowup in Lua\LaTeX. The \cs{ignoremathstyle} and \cs{discernmathstyle} macros from \pkg{scalerel} can be used to turn off the inefficient preservation of math styles locally, such as in the case where no subscripts are used.
 
 % \begin{macro}{@@_luatex_save_mathstyle:N}
@@ -448,37 +472,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
-
-% \begin{macro}{@@_hbox_set:Nn}
-% Can only be called in a \cs{@@_save_mathstyle:n} scope; sets the contents of an hbox in the saved math (or text) style.
-%    \begin{macrocode}
-\cs_new:Npn \@@_hbox_set:Nn #1 #2 {
-   \mode_if_math:TF
-     { \hbox_set:Nn #1 {$\@@_restore_mathstyle: #2$} }
-     { \hbox_set:Nn #1 { #2 } }
-}
-%    \end{macrocode}
-% \end{macro}
-
-% \subsection{Internals}
-
-% \begin{macro}{@@_setup_sizes:}
-%    \begin{macrocode}
-\cs_new:Npn \@@_setup_sizes: {
-  \int_gset:Nn \g@@_size {
-    \int_max:nn \g@@_size \g@@_size_up
-    + \bool_if:NTF \g@@_bump {1} {0}
-  }
-
-  \cs_set_eq:Nc \jmsdelim_size_cmd: {
-    \@@_clist_item:Nn \l@@_size_cmds {
-      \g@@_size + 1
-    }
-  }
-}
-%    \end{macrocode}
-% \end{macro}
-
+%
 % \subsection{Public interface for macro authors}
 %
 % \begin{macro}{jmsdelim_scope:nn}
@@ -503,13 +497,22 @@
 }
 %    \end{macrocode}
 % \end{macro}
-
+%
+% \begin{macro}{jmsdelim_hbox_set:Nn}
+%    \begin{macrocode}
+\cs_new:Npn \jmsdelim_hbox_set:Nn #1 #2 {
+   \mode_if_math:TF
+     { \hbox_set:Nn #1 {$\@@_restore_mathstyle: #2$} }
+     { \hbox_set:Nn #1 { #2 } }
+}
+%    \end{macrocode}
+% \end{macro}
 %
 % \begin{macro}{jmsdelim_surround:nnn}
 %    \begin{macrocode}
 \cs_new:Npn \jmsdelim_surround:nnn #1 #2 #3 {
   \jmsdelim_scope:nn {
-    \@@_hbox_set:Nn \l_tmpa_box {#3}
+    \jmsdelim_hbox_set:Nn \l_tmpa_box {#3}
   }{
     \mathopen\jmsdelim_size_cmd: {#1}
     \box_use:N \l_tmpa_box
@@ -523,8 +526,8 @@
 %    \begin{macrocode}
 \cs_new:Npn \jmsdelim_between:nnn #1 #2 #3 {
   \jmsdelim_scope:nn {
-    \@@_hbox_set:Nn \l_tmpa_box {#2}
-    \@@_hbox_set:Nn \l_tmpb_box {#3}
+    \jmsdelim_hbox_set:Nn \l_tmpa_box {#2}
+    \jmsdelim_hbox_set:Nn \l_tmpb_box {#3}
   }{
     \box_use:N \l_tmpa_box
     \mathrel{\jmsdelim_size_cmd: {#1}}
@@ -538,8 +541,8 @@
 %    \begin{macrocode}
 \cs_new:Npn \jmsdelim_between:nnnnn #1 #2 #3 #4 #5 {
   \jmsdelim_scope:nn {
-    \@@_hbox_set:Nn \l_tmpa_box {#4}
-    \@@_hbox_set:Nn \l_tmpb_box {#5}
+    \jmsdelim_hbox_set:Nn \l_tmpa_box {#4}
+    \jmsdelim_hbox_set:Nn \l_tmpb_box {#5}
   }{
     \mathopen\jmsdelim_size_cmd: {#1}
     \box_use:N \l_tmpa_box

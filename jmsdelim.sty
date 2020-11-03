@@ -41,7 +41,6 @@
 \keys_define:nn { jmsdelim } {
   size~commands .clist_set:N = \l__jmsdelim_size_cmds,
 }
-\NewDocumentCommand\normaldelim{}{}
 \keys_set:nn { jmsdelim } {
   size~commands = {relax,big,Big,bigg,Bigg},
 }
@@ -54,6 +53,18 @@
 \cs_new:Npn \__jmsdelim_clist_item:Nn #1 #2 {
   \clist_item:Nn #1 {
     \int_min:nn { #2 } {\clist_count:N #1}
+  }
+}
+\cs_new:Npn \__jmsdelim_setup_sizes: {
+  \int_gset:Nn \g__jmsdelim_size {
+    \int_max:nn \g__jmsdelim_size \g__jmsdelim_size_up
+    + \bool_if:NTF \g__jmsdelim_bump {1} {0}
+  }
+
+  \cs_set_eq:Nc \jmsdelim_size_cmd: {
+    \__jmsdelim_clist_item:Nn \l__jmsdelim_size_cmds {
+      \g__jmsdelim_size + 1
+    }
   }
 }
 
@@ -90,27 +101,6 @@
     \ThisStyle{#1}
   \fi
 }
-
-\cs_new:Npn \__jmsdelim_hbox_set:Nn #1 #2 {
-   \mode_if_math:TF
-     { \hbox_set:Nn #1 {$\__jmsdelim_restore_mathstyle: #2$} }
-     { \hbox_set:Nn #1 { #2 } }
-}
-
-
-\cs_new:Npn \__jmsdelim_setup_sizes: {
-  \int_gset:Nn \g__jmsdelim_size {
-    \int_max:nn \g__jmsdelim_size \g__jmsdelim_size_up
-    + \bool_if:NTF \g__jmsdelim_bump {1} {0}
-  }
-
-  \cs_set_eq:Nc \jmsdelim_size_cmd: {
-    \__jmsdelim_clist_item:Nn \l__jmsdelim_size_cmds {
-      \g__jmsdelim_size + 1
-    }
-  }
-}
-
 \cs_new:Npn \jmsdelim_scope:nn #1 #2 {
   \group_begin:
     \int_set:Nn \l_tmpa_int \g__jmsdelim_size_up
@@ -129,10 +119,14 @@
     \bool_gset:Nn \g__jmsdelim_bump \l_tmpa_bool
   \group_end:
 }
-
+\cs_new:Npn \jmsdelim_hbox_set:Nn #1 #2 {
+   \mode_if_math:TF
+     { \hbox_set:Nn #1 {$\__jmsdelim_restore_mathstyle: #2$} }
+     { \hbox_set:Nn #1 { #2 } }
+}
 \cs_new:Npn \jmsdelim_surround:nnn #1 #2 #3 {
   \jmsdelim_scope:nn {
-    \__jmsdelim_hbox_set:Nn \l_tmpa_box {#3}
+    \jmsdelim_hbox_set:Nn \l_tmpa_box {#3}
   }{
     \mathopen\jmsdelim_size_cmd: {#1}
     \box_use:N \l_tmpa_box
@@ -141,8 +135,8 @@
 }
 \cs_new:Npn \jmsdelim_between:nnn #1 #2 #3 {
   \jmsdelim_scope:nn {
-    \__jmsdelim_hbox_set:Nn \l_tmpa_box {#2}
-    \__jmsdelim_hbox_set:Nn \l_tmpb_box {#3}
+    \jmsdelim_hbox_set:Nn \l_tmpa_box {#2}
+    \jmsdelim_hbox_set:Nn \l_tmpb_box {#3}
   }{
     \box_use:N \l_tmpa_box
     \mathrel{\jmsdelim_size_cmd: {#1}}
@@ -151,8 +145,8 @@
 }
 \cs_new:Npn \jmsdelim_between:nnnnn #1 #2 #3 #4 #5 {
   \jmsdelim_scope:nn {
-    \__jmsdelim_hbox_set:Nn \l_tmpa_box {#4}
-    \__jmsdelim_hbox_set:Nn \l_tmpb_box {#5}
+    \jmsdelim_hbox_set:Nn \l_tmpa_box {#4}
+    \jmsdelim_hbox_set:Nn \l_tmpb_box {#5}
   }{
     \mathopen\jmsdelim_size_cmd: {#1}
     \box_use:N \l_tmpa_box
