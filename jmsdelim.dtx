@@ -20,6 +20,7 @@
 \microtypecontext{spacing=nonfrench}
 
 \usepackage{xcolor}
+\usepackage{zi4}
 \definecolor{Matterhorn}{RGB}{77,77,77}
 \definecolor{RedDevil}{RGB}{134,1,17}
 \definecolor{RegalBlue}{RGB}{3,69,117}
@@ -239,6 +240,21 @@
 % \subsection{Interface for macro authors}
 %
 % The internals of \pkg{jmsdelim} are implemented in \pkg{expl3}.
+%
+% \begin{function}{jmsdelim_scope:nn}
+%   \begin{syntax}
+%     "jmsdelim_scope:nn" \Arg{pre} \Arg{post}
+%   \end{syntax}
+%   This is the fundamental control structure for authors of custom delimiting commands; \meta{pre} is a block of code that renders things to temporary boxes, and \Arg{post} is code that \emph{uses} these boxes, placing them relative to some delimiters. The function of \cs{jmsdelim_scope:nn} is to watch for the delimiter size and bumping state updates induced by \meta{pre}, and set the delimiter size commands correctly before executing \meta{post}. Both \meta{pre} and \meta{post} are to be executed in the same block level.
+% \end{function}
+%
+% \begin{function}{jmsdelim_size_cmd:}
+%   \begin{syntax}
+%     "jmsdelim_size_cmd:"
+%   \end{syntax}
+%   This command is meant to be used inside the \meta{post} block of \cs{jmsdelim_scope:nn} to set the size of a given delimiter; it behaves like \cs{big}, etc.
+% \end{function}
+%
 % \begin{function}{jmsdelim_surround:nnn}
 %   \begin{syntax}
 %     "jmsdelim_surround:nnn" \Arg{left} \Arg{right} \Arg{body}
@@ -270,6 +286,7 @@
 %   \NewDocumentCommand\Case{mm}{%
 %     \DelimBetweenSurround{[}{\vert}{]}{#1}{#2}%
 %   }
+%   \[\DelimPrn{\DelimMin{2}\DelimPrn{a}(a)} \]
 %   The following states the idempotency of an adjunction:
 %   \[
 %   \Cut{t}{\mt x.\Cut{\mu\alpha.\Cut{u}{e}}{e'}}=\Cut{\mu\alpha.\Cut{t}{\mt x.\Cut{u}{e}}}{e'}
@@ -336,17 +353,20 @@
 }
 %    \end{macrocode}
 %    \begin{macrocode}
+\NewDocumentCommand\normaldelim{}{}
 \keys_set:nn { jmsdelim } {
-  size~commands = {{},\big,\Big,\bigg,\Bigg},
+  size~commands = {relax,big,Big,bigg,Bigg},
 }
 %    \end{macrocode}
 %
 % Then, we set up the internal state that will be used by \pkg{jmsdelim}.
 %    \begin{macrocode}
 \int_new:N \g@@_size
-\int_gset:Nn \g@@_size {0}
+\int_new:N \g@@_size_up
 \bool_new:N \g@@_bump
-\bool_gset:Nn \g@@_bump \c_false_bool
+\bool_gset_false:N \g@@_bump
+\int_gset:Nn \g@@_size {0}
+\int_gset:Nn \g@@_size_up {0}
 %    \end{macrocode}
 %
 % \begin{macro}{\@@_clist_item:Nn}
@@ -356,26 +376,6 @@
   \clist_item:Nn #1 {
     \int_min:nn { #2 } {\clist_count:N #1}
   }
-}
-%    \end{macrocode}
-% \end{macro}
-
-% \begin{macro}{\@@_set_delim_size:n}
-% Updates the current delimiter size only if it results in an increase.
-%    \begin{macrocode}
-\cs_new:Npn \@@_set_delim_size:n #1 {
-  \int_gset:Nn \g@@_size {
-    \int_max:nn {\g@@_size} {#1}
-  }
-}
-%    \end{macrocode}
-% \end{macro}
-
-% \begin{macro}{\@@_incr_delim_size:}
-% Increases the current delimiter size by 1.
-%    \begin{macrocode}
-\cs_new:Npn \@@_incr_delim_size: {
-  \@@_set_delim_size:n {\g@@_size + 1}
 }
 %    \end{macrocode}
 % \end{macro}
@@ -439,35 +439,17 @@
 %    \end{macrocode}
 % \end{macro}
 
-% \subsection{Public interface for macro authors}
+% \subsection{Internals}
 
-% \begin{macro}{@@_scope:n}
+% \begin{macro}{@@_setup_sizes:}
 %    \begin{macrocode}
-\cs_new:Npn \@@_scope:n #1 {
-  \group_begin:
-  \@@_save_mathstyle:n {#1}
-  \group_end:
-}
-%    \end{macrocode}
-% \end{macro}
-
-% \begin{macro}{@@_typeset:Nn}
-% Used internally to the delimiter primitives, this function typesets its second argument into the box named by its first argument, keeping track of delimiter size states; in particular, this function causes \cs{jmsdelim_size_cmd:} to be locally set to the correct size command.
-%    \begin{macrocode}
-\cs_new:Npn \@@_typeset:Nn #1 #2 {
-  \bool_set:Nn \l_tmpa_bool \g@@_bump
-  \int_set:Nn \g@@_size {0}
-  \bool_set:Nn \g@@_bump \c_false_bool
-
-  \@@_hbox_set:Nn #1 {#2}
-
-  \bool_if:NT \g@@_bump {
-    \bool_if:NF \l_tmpa_bool {
-      \@@_incr_delim_size:
-    }
+\cs_new:Npn \@@_setup_sizes: {
+  \int_gset:Nn \g@@_size {
+    \int_max:nn \g@@_size \g@@_size_up
+    + \bool_if:NTF \g@@_bump {1} {0}
   }
 
-  \cs_set_nopar:Npn \jmsdelim_size_cmd: {
+  \cs_set_eq:Nc \jmsdelim_size_cmd: {
     \@@_clist_item:Nn \l@@_size_cmds {
       \g@@_size + 1
     }
@@ -476,15 +458,41 @@
 %    \end{macrocode}
 % \end{macro}
 
+% \subsection{Public interface for macro authors}
+%
+% \begin{macro}{jmsdelim_scope:nn}
+%    \begin{macrocode}
+\cs_new:Npn \jmsdelim_scope:nn #1 #2 {
+  \group_begin:
+    \int_set:Nn \l_tmpa_int \g@@_size_up
+    \int_gset:Nn \g@@_size_up 0
+    \bool_set:Nn \l_tmpa_bool \g@@_bump
+    \bool_gset_false:N \g@@_bump
+    \int_gset:Nn \g@@_size 0
+    \group_begin:
+      \@@_save_mathstyle:n {
+        #1
+        \@@_setup_sizes:
+        #2
+      }
+    \group_end:
+    \int_gset:Nn \g@@_size_up \l_tmpa_int
+    \bool_gset:Nn \g@@_bump \l_tmpa_bool
+  \group_end:
+}
+%    \end{macrocode}
+% \end{macro}
+
+%
 % \begin{macro}{jmsdelim_surround:nnn}
 %    \begin{macrocode}
 \cs_new:Npn \jmsdelim_surround:nnn #1 #2 #3 {
-  \@@_scope:n {
-    \@@_typeset:Nn \l_tmpa_box {#3}
-
+  \jmsdelim_scope:nn {
+    \@@_hbox_set:Nn \l_tmpa_box {#3}
+  }{
     \mathopen\jmsdelim_size_cmd: {#1}
     \box_use:N \l_tmpa_box
-    \mathopen\jmsdelim_size_cmd: {#2}
+    \mathclose\jmsdelim_size_cmd: {#2}
   }
 }
 %    \end{macrocode}
@@ -493,9 +501,10 @@
 % \begin{macro}{jmsdelim_between:nnn}
 %    \begin{macrocode}
 \cs_new:Npn \jmsdelim_between:nnn #1 #2 #3 {
-  \@@_scope:n {
-    \@@_typeset:Nn \l_tmpa_box {#2}
-    \@@_typeset:Nn \l_tmpb_box {#3}
+  \jmsdelim_scope:nn {
+    \@@_hbox_set:Nn \l_tmpa_box {#2}
+    \@@_hbox_set:Nn \l_tmpb_box {#3}
+  }{
     \box_use:N \l_tmpa_box
     \mathrel{\jmsdelim_size_cmd: {#1}}
     \box_use:N \l_tmpb_box
@@ -507,10 +516,10 @@
 % \begin{macro}{jmsdelim_between:nnnnn}
 %    \begin{macrocode}
 \cs_new:Npn \jmsdelim_between:nnnnn #1 #2 #3 #4 #5 {
-  \@@_scope:n {
-    \@@_typeset:Nn \l_tmpa_box {#4}
-    \@@_typeset:Nn \l_tmpb_box {#5}
-
+  \jmsdelim_scope:nn {
+    \@@_hbox_set:Nn \l_tmpa_box {#4}
+    \@@_hbox_set:Nn \l_tmpb_box {#5}
+  }{
     \mathopen\jmsdelim_size_cmd: {#1}
     \box_use:N \l_tmpa_box
     \mathrel{\jmsdelim_size_cmd: {#2}}
@@ -527,7 +536,7 @@
 % \begin{macro}{DelimMin}
 %    \begin{macrocode}
 \NewDocumentCommand\DelimMin{m}{
-  \@@_set_delim_size:n {#1}
+  \int_gset:Nn \g@@_size_up {#1}
 }
 %    \end{macrocode}
 % \end{macro}
@@ -535,7 +544,7 @@
 % \begin{macro}{DelimBump}
 %    \begin{macrocode}
 \NewDocumentCommand\DelimBump{}{
-  \bool_gset:Nn \g@@_bump \c_true_bool
+  \bool_gset_true:N \g@@_bump
 }
 %    \end{macrocode}
 % \end{macro}
@@ -553,6 +562,11 @@
 \NewDocumentCommand\DelimBetween{mmm}{
   \jmsdelim_between:nnn {#1} {#2} {#3}
 }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{DelimBetweenSurround}
+%    \begin{macrocode}
 \NewDocumentCommand\DelimBetweenSurround{mmmmm}{
   \jmsdelim_between:nnnnn {#1} {#2} {#3} {#4} {#5}
 }

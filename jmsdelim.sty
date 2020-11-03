@@ -41,27 +41,20 @@
 \keys_define:nn { jmsdelim } {
   size~commands .clist_set:N = \l__jmsdelim_size_cmds,
 }
+\NewDocumentCommand\normaldelim{}{}
 \keys_set:nn { jmsdelim } {
-  size~commands = {{},\big,\Big,\bigg,\Bigg},
+  size~commands = {relax,big,Big,bigg,Bigg},
 }
 \int_new:N \g__jmsdelim_size
-\int_gset:Nn \g__jmsdelim_size {0}
+\int_new:N \g__jmsdelim_size_up
 \bool_new:N \g__jmsdelim_bump
-\bool_gset:Nn \g__jmsdelim_bump \c_false_bool
+\bool_gset_false:N \g__jmsdelim_bump
+\int_gset:Nn \g__jmsdelim_size {0}
+\int_gset:Nn \g__jmsdelim_size_up {0}
 \cs_new:Npn \__jmsdelim_clist_item:Nn #1 #2 {
   \clist_item:Nn #1 {
     \int_min:nn { #2 } {\clist_count:N #1}
   }
-}
-
-\cs_new:Npn \__jmsdelim_set_delim_size:n #1 {
-  \int_gset:Nn \g__jmsdelim_size {
-    \int_max:nn {\g__jmsdelim_size} {#1}
-  }
-}
-
-\cs_new:Npn \__jmsdelim_incr_delim_size: {
-  \__jmsdelim_set_delim_size:n {\g__jmsdelim_size + 1}
 }
 
 
@@ -105,55 +98,62 @@
 }
 
 
-\cs_new:Npn \__jmsdelim_scope:n #1 {
-  \group_begin:
-  \__jmsdelim_save_mathstyle:n {#1}
-  \group_end:
-}
-
-\cs_new:Npn \__jmsdelim_typeset:Nn #1 #2 {
-  \bool_set:Nn \l_tmpa_bool \g__jmsdelim_bump
-  \int_set:Nn \g__jmsdelim_size {0}
-  \bool_set:Nn \g__jmsdelim_bump \c_false_bool
-
-  \__jmsdelim_hbox_set:Nn #1 {#2}
-
-  \bool_if:NT \g__jmsdelim_bump {
-    \bool_if:NF \l_tmpa_bool {
-      \__jmsdelim_incr_delim_size:
-    }
+\cs_new:Npn \__jmsdelim_setup_sizes: {
+  \int_gset:Nn \g__jmsdelim_size {
+    \int_max:nn \g__jmsdelim_size \g__jmsdelim_size_up
+    + \bool_if:NTF \g__jmsdelim_bump {1} {0}
   }
 
-  \cs_set_nopar:Npn \jmsdelim_size_cmd: {
+  \cs_set_eq:Nc \jmsdelim_size_cmd: {
     \__jmsdelim_clist_item:Nn \l__jmsdelim_size_cmds {
       \g__jmsdelim_size + 1
     }
   }
 }
 
-\cs_new:Npn \jmsdelim_surround:nnn #1 #2 #3 {
-  \__jmsdelim_scope:n {
-    \__jmsdelim_typeset:Nn \l_tmpa_box {#3}
+\cs_new:Npn \jmsdelim_scope:nn #1 #2 {
+  \group_begin:
+    \int_set:Nn \l_tmpa_int \g__jmsdelim_size_up
+    \int_gset:Nn \g__jmsdelim_size_up 0
+    \bool_set:Nn \l_tmpa_bool \g__jmsdelim_bump
+    \bool_gset_false:N \g__jmsdelim_bump
+    \int_gset:Nn \g__jmsdelim_size 0
+    \group_begin:
+      \__jmsdelim_save_mathstyle:n {
+        #1
+        \__jmsdelim_setup_sizes:
+        #2
+      }
+    \group_end:
+    \int_gset:Nn \g__jmsdelim_size_up \l_tmpa_int
+    \bool_gset:Nn \g__jmsdelim_bump \l_tmpa_bool
+  \group_end:
+}
 
+\cs_new:Npn \jmsdelim_surround:nnn #1 #2 #3 {
+  \jmsdelim_scope:nn {
+    \__jmsdelim_hbox_set:Nn \l_tmpa_box {#3}
+  }{
     \mathopen\jmsdelim_size_cmd: {#1}
     \box_use:N \l_tmpa_box
-    \mathopen\jmsdelim_size_cmd: {#2}
+    \mathclose\jmsdelim_size_cmd: {#2}
   }
 }
 \cs_new:Npn \jmsdelim_between:nnn #1 #2 #3 {
-  \__jmsdelim_scope:n {
-    \__jmsdelim_typeset:Nn \l_tmpa_box {#2}
-    \__jmsdelim_typeset:Nn \l_tmpb_box {#3}
+  \jmsdelim_scope:nn {
+    \__jmsdelim_hbox_set:Nn \l_tmpa_box {#2}
+    \__jmsdelim_hbox_set:Nn \l_tmpb_box {#3}
+  }{
     \box_use:N \l_tmpa_box
     \mathrel{\jmsdelim_size_cmd: {#1}}
     \box_use:N \l_tmpb_box
   }
 }
 \cs_new:Npn \jmsdelim_between:nnnnn #1 #2 #3 #4 #5 {
-  \__jmsdelim_scope:n {
-    \__jmsdelim_typeset:Nn \l_tmpa_box {#4}
-    \__jmsdelim_typeset:Nn \l_tmpb_box {#5}
-
+  \jmsdelim_scope:nn {
+    \__jmsdelim_hbox_set:Nn \l_tmpa_box {#4}
+    \__jmsdelim_hbox_set:Nn \l_tmpb_box {#5}
+  }{
     \mathopen\jmsdelim_size_cmd: {#1}
     \box_use:N \l_tmpa_box
     \mathrel{\jmsdelim_size_cmd: {#2}}
@@ -164,11 +164,11 @@
 
 
 \NewDocumentCommand\DelimMin{m}{
-  \__jmsdelim_set_delim_size:n {#1}
+  \int_gset:Nn \g__jmsdelim_size_up {#1}
 }
 
 \NewDocumentCommand\DelimBump{}{
-  \bool_gset:Nn \g__jmsdelim_bump \c_true_bool
+  \bool_gset_true:N \g__jmsdelim_bump
 }
 \NewDocumentCommand\DelimSurround{mmm}{
   \jmsdelim_surround:nnn {#1} {#2} {#3}
