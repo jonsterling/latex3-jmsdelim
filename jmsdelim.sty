@@ -121,7 +121,7 @@
 }
 \cs_new:Npn \jmsdelim_hbox_set:Nn #1 #2 {
    \mode_if_math:TF
-     { \hbox_set:Nn #1 {$\__jmsdelim_restore_mathstyle: #2$} }
+     { \hbox_set:Nn #1 {$\m@th\__jmsdelim_restore_mathstyle: #2$} }
      { \hbox_set:Nn #1 { #2 } }
 }
 \cs_new:Npn \jmsdelim_surround:nnn #1 #2 #3 {

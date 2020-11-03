@@ -502,7 +502,7 @@
 %    \begin{macrocode}
 \cs_new:Npn \jmsdelim_hbox_set:Nn #1 #2 {
    \mode_if_math:TF
-     { \hbox_set:Nn #1 {$\@@_restore_mathstyle: #2$} }
+     { \hbox_set:Nn #1 {$\m@th\@@_restore_mathstyle: #2$} }
      { \hbox_set:Nn #1 { #2 } }
 }
 %    \end{macrocode}
