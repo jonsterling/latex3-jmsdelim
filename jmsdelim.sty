@@ -46,8 +46,6 @@
 }
 \int_new:N \g__jmsdelim_size
 \int_new:N \g__jmsdelim_size_up
-\bool_new:N \g__jmsdelim_bump
-\bool_gset_false:N \g__jmsdelim_bump
 \int_gset:Nn \g__jmsdelim_size {0}
 \int_gset:Nn \g__jmsdelim_size_up {0}
 \cs_new:Npn \__jmsdelim_clist_item:Nn #1 #2 {
@@ -58,7 +56,6 @@
 \cs_new:Npn \__jmsdelim_setup_sizes: {
   \int_gset:Nn \g__jmsdelim_size {
     \int_max:nn \g__jmsdelim_size \g__jmsdelim_size_up
-    + \bool_if:NTF \g__jmsdelim_bump {1} {0}
   }
 
   \cs_set_eq:Nc \jmsdelim_size_cmd: {
@@ -105,8 +102,6 @@
   \group_begin:
     \int_set:Nn \l_tmpa_int \g__jmsdelim_size_up
     \int_gset:Nn \g__jmsdelim_size_up 0
-    \bool_set:Nn \l_tmpa_bool \g__jmsdelim_bump
-    \bool_gset_false:N \g__jmsdelim_bump
     \int_gset:Nn \g__jmsdelim_size 0
     \group_begin:
       \__jmsdelim_save_mathstyle:n {
@@ -116,7 +111,6 @@
       }
     \group_end:
     \int_gset:Nn \g__jmsdelim_size_up {\int_max:nn \g__jmsdelim_size_up \l_tmpa_int}
-    \bool_gset:Nn \g__jmsdelim_bump \l_tmpa_bool
   \group_end:
 }
 \cs_new:Npn \jmsdelim_hbox_set:Nn #1 #2 {
@@ -161,9 +155,6 @@
   \int_gset:Nn \g__jmsdelim_size_up {#1}
 }
 
-\NewDocumentCommand\DelimBump{}{
-  \bool_gset_true:N \g__jmsdelim_bump
-}
 \NewDocumentCommand\DelimSurround{mmm}{
   \jmsdelim_surround:nnn {#1} {#2} {#3}
 }

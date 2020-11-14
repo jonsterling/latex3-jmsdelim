@@ -134,29 +134,6 @@
 %   \[ \Hom{\Cat}{1}{\Psh{\mathbb{C}}} \]
 % \end{example}
 %
-% \begin{function}{\DelimBump}
-%   \begin{syntax}
-%     \cs{DelimBump}
-%   \end{syntax}
-%
-%   This increases the minimum delimiter size by one outside the current location. This can be used to achieve a readable notation for cuts in sequent calculus as in \citet{munch:2013,munch:perfectcut}, for instance:
-%   \begin{example}
-%     \NewDocumentCommand\Cut{mm}{%
-%       \DelimBump%
-%       \DelimBetweenSurround{\langle}{\Vert}{\rangle}{#1}{#2}%
-%     }
-%     \NewDocumentCommand\Mu{mm}{\mu #1.#2}
-%     \NewDocumentCommand\MuTilde{mm}{\tilde\mu #1.#2}
-%     \[
-%       \Cut{t}{
-%         \MuTilde{x}{
-%           \Cut{\Mu{\alpha}{\Cut{u}{e}}}{e'}
-%         }
-%       }
-%     \]
-%   \end{example}
-% \end{function}
-%
 %
 %
 % \subsection{Basic Delimiter commands}
@@ -267,7 +244,7 @@
 %   \begin{syntax}
 %     "jmsdelim_scope:nn" \Arg{pre} \Arg{post}
 %   \end{syntax}
-%   This is the fundamental control structure for authors of custom delimiting commands; \meta{pre} is a block of code that renders things to temporary boxes, and \Arg{post} is code that \emph{uses} these boxes, placing them relative to some delimiters. The function of \cs{jmsdelim_scope:nn} is to watch for the delimiter size and bumping state updates induced by \meta{pre}, and set the delimiter size commands correctly before executing \meta{post}. Both \meta{pre} and \meta{post} are to be executed in the same block level.
+%   This is the fundamental control structure for authors of custom delimiting commands; \meta{pre} is a block of code that renders things to temporary boxes, and \Arg{post} is code that \emph{uses} these boxes, placing them relative to some delimiters. The function of \cs{jmsdelim_scope:nn} is to watch for the delimiter size updates induced by \meta{pre}, and set the delimiter size commands correctly before executing \meta{post}. Both \meta{pre} and \meta{post} are to be executed in the same block level.
 % \end{function}
 %
 % \begin{function}{jmsdelim_hbox_set:Nn}
@@ -305,54 +282,6 @@
 %   This routine separates \meta{lbody} and \meta{rbody} with a separator \meta{sep} of the appropriate size, and surrounds the result by \meta{left} and \meta{right} respectively of the same size.
 % \end{function}
 
-% \section{Extended example from \pkg{perfectcut}}
-% \begin{wide-example}
-%   \ignoremathstyle
-%   \NewDocumentCommand\Cut{mm}{%
-%     \DelimBump\DelimBetweenSurround{\langle}{\Vert}{\rangle}{#1}{#2}%
-%   }
-%   \NewDocumentCommand\mt{}{\tilde\mu}
-%   \NewDocumentCommand\Case{mm}{%
-%     \DelimBetweenSurround{[}{\vert}{]}{#1}{#2}%
-%   }
-%   The following states the idempotency of an adjunction:
-%   \[
-%   \Cut{t}{\mt x.\Cut{\mu\alpha.\Cut{u}{e}}{e'}}=\Cut{\mu\alpha.\Cut{t}{\mt x.\Cut{u}{e}}}{e'}
-%   \]
-%
-%   The following states the commutativity of a strong monad:
-%   \[
-%   \Cut t{\mt x.\Cut u{\mt y.\Cut ve}}=\Cut u{\mt y.\Cut t{\mt x.\Cut ve}}
-%   \]
-%   Using \cs{underline} to mark redexes:
-%   \begin{align*}
-%     & \delta(V,x.y,x.y)\\
-%     & = \mu{\star}.
-%         \Cut{V}{
-%           \Case{
-%             \mt x.\underline{\Cut y{\star}}
-%           }{
-%             \mt x.\underline{\Cut y{\star}}
-%           }
-%         }\\
-%     & = \mu{\star}.
-%         \Cut{V}{
-%           \underline{
-%             \Case{
-%               \mt x.\Cut{\iota_{1}(x)}{\mt z.\Cut{y}{\star}}
-%             }{
-%               \mt x.\Cut{\iota_{2}(x)}{\mt z.\Cut{y}{\star}}
-%             }
-%           }
-%         }\\
-%     & = \mu{\star}.\Cut{V}{\underline{\mt z.}\Cut{y}{\star}}\\
-%     & = \mu{\star}.\Cut{y}{\star}\\
-%     & =y
-%   \end{align*}
-% \end{wide-example}
-%
-%
-%
 % \end{documentation}
 %
 % \begin{implementation}
@@ -388,8 +317,6 @@
 %    \begin{macrocode}
 \int_new:N \g@@_size
 \int_new:N \g@@_size_up
-\bool_new:N \g@@_bump
-\bool_gset_false:N \g@@_bump
 \int_gset:Nn \g@@_size {0}
 \int_gset:Nn \g@@_size_up {0}
 %    \end{macrocode}
@@ -412,7 +339,6 @@
 \cs_new:Npn \@@_setup_sizes: {
   \int_gset:Nn \g@@_size {
     \int_max:nn \g@@_size \g@@_size_up
-    + \bool_if:NTF \g@@_bump {1} {0}
   }
 
   \cs_set_eq:Nc \jmsdelim_size_cmd: {
@@ -481,8 +407,6 @@
   \group_begin:
     \int_set:Nn \l_tmpa_int \g@@_size_up
     \int_gset:Nn \g@@_size_up 0
-    \bool_set:Nn \l_tmpa_bool \g@@_bump
-    \bool_gset_false:N \g@@_bump
     \int_gset:Nn \g@@_size 0
     \group_begin:
       \@@_save_mathstyle:n {
@@ -492,7 +416,6 @@
       }
     \group_end:
     \int_gset:Nn \g@@_size_up {\int_max:nn \g@@_size_up \l_tmpa_int}
-    \bool_gset:Nn \g@@_bump \l_tmpa_bool
   \group_end:
 }
 %    \end{macrocode}
@@ -565,14 +488,6 @@
 %    \end{macrocode}
 % \end{macro}
 
-% \begin{macro}{DelimBump}
-%    \begin{macrocode}
-\NewDocumentCommand\DelimBump{}{
-  \bool_gset_true:N \g@@_bump
-}
-%    \end{macrocode}
-% \end{macro}
-%
 % \begin{macro}{DelimSurround}
 %    \begin{macrocode}
 \NewDocumentCommand\DelimSurround{mmm}{
