@@ -134,6 +134,20 @@
 %   \[ \Hom{\Cat}{1}{\Psh{\mathbb{C}}} \]
 % \end{example}
 %
+% \paragraph{Behavior under subscripts}
+% By default, delimiter sizes are capped under subscripts and superscripts because the alternative is unaesthetic. For instance, consider the following somewhat contrived examples:
+% \begin{example}
+%   \NewDocumentCommand\Sum{mm}{%
+%     \DelimMin{1}{\textstyle\sum}_{#1}{#2}%
+%   }
+%   \[
+%     \int_{\DelimPrn{\Sum{i}{a_i}}}
+%     \int_{\DelimPrn{\DelimMin{4}\Sum{i}{a_i}}}
+%   \]
+% \end{example}
+%
+% Because the emitted delimiter size under a subscript does \emph{not} determine the actual amount of space used, it is in most cases not correct for this delimiter size to have an effect on its non-subscript context. For this reason, judicious use of the \cs{DelimProtect} command is recommended in the case of subscripts.
+%
 %
 %
 % \subsection{Basic Delimiter commands}
@@ -183,6 +197,35 @@
 %   \end{example}
 % \end{function}
 %
+% \begin{function}{\DelimProtect}
+%   \begin{syntax}
+%     \cs{DelimProtect}\marg{body}
+%   \end{syntax}
+%   Executes \meta{body} in a sandbox, preventing its state updates from bubbling outward; this is useful in case of subscripts and superscripts.
+%   The following command demonstrates incorrect sizing in the presence of a high delimiter size within a subscript:
+%   \begin{example}
+%     \NewDocumentCommand\Sum{mm}{%
+%       \DelimMin{1}{\textstyle\sum}_{#1}{#2}%
+%     }
+%     \[
+%       \DelimPrn{\Sum{\DelimPrn{\DelimMin{4}\Sum{i}{a_i}}}{F}}
+%     \]
+%   \end{example}
+%
+%   Using a combination of \cs{DelimProtect} and \cs{DelimMin}, the formatting can be corrected locally.
+%   \begin{example}
+%     \NewDocumentCommand\Sum{mm}{%
+%       \DelimMin{1}{\textstyle\sum}_{\DelimProtect{#1}}{#2}%
+%     }
+%     \[
+%       \DelimPrn{
+%         \DelimMin{2}
+%         \Sum{\DelimPrn{\DelimMin{4}\Sum{i}{a_i}}}{F}
+%       }
+%     \]
+%   \end{example}
+% \end{function}
+%
 % \subsection{Derived delimiter commands}
 %
 % \begin{function}{\DelimPrn}
@@ -222,16 +265,20 @@
 %
 %
 % \subsection{Configuration and options}\label{sec:options}
-% \begin{function}{\jmsdelimsetup}
+% \begin{function}{\DelimSetup}
 %   \begin{syntax}
-%     \cs{jmsdelimsetup}\marg{options}
+%     \cs{DelimSetup}\marg{options}
 %   \end{syntax}
 %   \pkg{jmsdelim} can be customized along a few axes.
 % \end{function}
 %
 % \begin{variable}{size commands}
-%   The option \cmd{size commands} is a comma-separated list which contains a list of sizing commands for delimiters, from smallest to largest.
-%
+%   The option \cmd{size commands} is a comma-separated list which contains a list of sizing commands for delimiters, from smallest to largest. By default, the standard \cs{big}, \cs{Big}, \cs{bigg}, \cs{Bigg} sequence is replaced by custom versions that behave differently in script size. This behavior can be overridden as follows:
+%   \begin{verbatim}
+%     \DelimSetup{
+%       size commands = {\relax,\big,\Big,\bigg,\Bigg}
+%     }
+%   \end{verbatim}
 % \end{variable}
 %
 %
@@ -281,7 +328,13 @@
 %   \end{syntax}
 %   This routine separates \meta{lbody} and \meta{rbody} with a separator \meta{sep} of the appropriate size, and surrounds the result by \meta{left} and \meta{right} respectively of the same size.
 % \end{function}
-
+%
+% \begin{function}{jmsdelim_protect:n}
+%   \begin{syntax}
+%     "jmsdelim_protect:n" \Arg{body}
+%   \end{syntax}
+%   Executes \meta{body} in a sandbox, preventing its state updates from bubbling upward.
+% \end{function}
 % \end{documentation}
 %
 % \begin{implementation}
@@ -309,7 +362,23 @@
   size~commands .clist_set:N = \l@@_size_cmds,
 }
 \keys_set:nn { jmsdelim } {
-  size~commands = {relax,big,Big,bigg,Bigg},
+  size~commands = {relax,jmsdelim_big:n,jmsdelim_Big:n,jmsdelim_bigg:n,jmsdelim_Bigg:n},
+}
+
+\cs_new:Npn \jmsdelim_big:n #1 {
+  {\mathchoice{\big #1} {\big #1}{\big #1}{#1}}
+}
+
+\cs_new:Npn \jmsdelim_Big:n #1 {
+  {\mathchoice{\Big #1} {\Big #1}{\big #1}{#1}}
+}
+
+\cs_new:Npn \jmsdelim_bigg:n #1 {
+  {\mathchoice{\bigg #1} {\bigg #1}{\big #1}{#1}}
+}
+
+\cs_new:Npn \jmsdelim_Bigg:n #1 {
+  {\mathchoice{\Bigg #1} {\Bigg #1}{\big #1}{#1}}
 }
 %    \end{macrocode}
 %
@@ -445,6 +514,21 @@
 %    \end{macrocode}
 % \end{macro}
 %
+% \begin{macro}{jmsdelim_protect:n}
+%    \begin{macrocode}
+\cs_new:Npn \jmsdelim_protect:n #1 {
+  \group_begin:
+    \int_set:Nn \l_tmpa_int \g@@_size_up
+    \int_set:Nn \l_tmpb_int \g@@_size
+    \group_begin: #1 \group_end:
+    \int_gset:Nn \g@@_size_up \l_tmpa_int
+    \int_gset:Nn \g@@_size \l_tmpb_int
+  \group_end:
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%
 % \begin{macro}{jmsdelim_between:nnn}
 %    \begin{macrocode}
 \cs_new:Npn \jmsdelim_between:nnn #1 #2 #3 {
@@ -483,7 +567,7 @@
 % \begin{macro}{DelimMin}
 %    \begin{macrocode}
 \NewDocumentCommand\DelimMin{m}{
-  \int_gset:Nn \g@@_size_up {#1}
+  \int_gset:Nn \g@@_size_up {\int_max:nn \g@@_size_up {#1}}
 }
 %    \end{macrocode}
 % \end{macro}
@@ -508,6 +592,14 @@
 %    \begin{macrocode}
 \NewDocumentCommand\DelimBetweenSurround{mmmmm}{
   \jmsdelim_between:nnnnn {#1} {#2} {#3} {#4} {#5}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{DelimProtect}
+%    \begin{macrocode}
+\NewDocumentCommand\DelimProtect{m}{
+  \jmsdelim_protect:n {#1}
 }
 %    \end{macrocode}
 % \end{macro}
