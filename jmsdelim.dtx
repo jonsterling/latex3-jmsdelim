@@ -14,6 +14,7 @@
 %<*driver>
 \documentclass[cs-f]{l3doc}
 \usepackage{jmsdelim}
+\usepackage{mlmodern}
 \usepackage{mleftright}
 \usepackage[capitalize]{cleveref}
 \usepackage[protrusion=true,expansion=true,tracking=false]{microtype}
@@ -256,11 +257,25 @@
 %   Surrounds \meta{body} in angle brackets.
 % \end{function}
 %
+% \begin{function}{\DelimVrt}
+%   \begin{syntax}
+%     \cs{DelimVrt}\marg{body}
+%   \end{syntax}
+%   Surrounds \meta{body} in vertical brackets.
+% \end{function}
+%
 % \begin{function}{\DelimBbrk}
 %   \begin{syntax}
 %     \cs{DelimBbrk}\marg{body}
 %   \end{syntax}
 %   Surrounds \meta{body} in Scott brackets (requires \cs{llbracket}, \cs{rrbracket} to be defined).
+% \end{function}
+%
+% \begin{function}{\DelimVvrt}
+%   \begin{syntax}
+%     \cs{DelimVvrt}\marg{body}
+%   \end{syntax}
+%   Surrounds \meta{body} in double vertical bars.
 % \end{function}
 %
 %
@@ -640,6 +655,22 @@
 %    \begin{macrocode}
 \NewDocumentCommand\DelimGl{m}{
   \jmsdelim_surround:nnn {\langle} {\rangle} {#1}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{DelimVrt}
+%    \begin{macrocode}
+\NewDocumentCommand\DelimVrt{m}{
+  \jmsdelim_surround:nnn {\lvert} {\rvert} {#1}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{DelimVvrt}
+%    \begin{macrocode}
+\NewDocumentCommand\DelimVvrt{m}{
+  \jmsdelim_surround:nnn {\lVert} {\rVert} {#1}
 }
 %    \end{macrocode}
 % \end{macro}
