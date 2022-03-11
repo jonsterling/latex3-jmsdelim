@@ -3,6 +3,27 @@ The `jmsdelim` package
 
 A package for compositional delimiter sizing.
 
+Correctly sizing delimiters is very difficult, particularly in well-architected
+documents: a correctly engineered mathematical document will include macros for
+all operations, and these macros necessarily will include delimiters (such as
+parentheses). However, the correct size for the delimiter cannot be chosen
+ahead of time, because it will depend on the arguments; two options are
+available:
+
+1. Provide optional arguments to each notation macro for choosing delimiter
+   sizes. This is nearly intractable to do in practice.
+
+2. Ignore delimiter sizes.
+
+With jmsdelim we offer an alternative: the correct delimiter sizes can be set
+at the leaf nodes of a mathematical expression, and magically bubble upward
+through the delimiters.
+
+
+
+Contents
+--------
+
 The following files are included:
 - `jmsdelim.dtx` : the doctrip source for the package and documentation
 - `jmsdelim.ins` : the generation script for producing `ebproof-rules.sty`
