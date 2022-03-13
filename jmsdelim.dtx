@@ -136,7 +136,7 @@
 % \end{example}
 %
 % \paragraph{Behavior under subscripts}
-% By default, delimiter sizes are capped under subscripts and superscripts because the alternative is unaesthetic. For instance, consider the following somewhat contrived examples:
+% By default, delimiter sizes are capped under subscripts and superscripts because the alternative is unaesthetic. For instance:
 % \begin{example}
 %   \NewDocumentCommand\Sum{mm}{%
 %     \DelimMin{1}{\textstyle\sum}_{#1}{#2}%
@@ -147,7 +147,18 @@
 %   \]
 % \end{example}
 %
-% Because the emitted delimiter size under a subscript does \emph{not} determine the actual amount of space used, it is in most cases not correct for this delimiter size to have an effect on its non-subscript context. For this reason, judicious use of the \cs{DelimProtect} command is recommended in the case of subscripts.
+% \paragraph{Protected scopes}
+%
+% Because the emitted delimiter size under a subscript does \emph{not} determine the actual amount of space used, it is in most cases not correct for this delimiter size to have an effect on its non-subscript context. For this reason, judicious use of the \cs{DelimProtect} command is recommended in the case of subscripts. Compare the badly typeset example on the left with the nicely typeset example on the right:
+% \begin{example}
+%   \NewDocumentCommand\Sum{mm}{%
+%     \DelimMin{1}{\textstyle\sum}_{#1}{#2}%
+%   }
+%   \[
+%     \DelimBrk{A_{\DelimMin{4}\Sum{i}x_i}}
+%     \DelimBrk{\DelimMin{1}A_{\DelimProtect{\DelimMin{4}\Sum{i}x_i}}}
+%   \]
+% \end{example}
 %
 %
 %
@@ -170,7 +181,7 @@
 %
 % \begin{function}{\DelimBetween}
 %   \begin{syntax}
-%     \cs{DelimSurround}\marg{sep}\marg{lbody}\marg{rbody}
+%     \cs{DelimBetween}\marg{sep}\marg{lbody}\marg{rbody}
 %   \end{syntax}
 %   Places an appropriately sized \meta{sep} between \meta{lbody} and \meta{rbody}.
 %   \begin{example}
